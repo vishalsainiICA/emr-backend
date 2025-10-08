@@ -1,0 +1,17 @@
+import express from "express";
+import { verifyToken } from "../utills/jwtToken.js";
+import { addBranch, addHospital, addSingleDepartment, deleteHospital, deleteSingleDepartment, findHospitalById, updateHospital } from "../controllers/commonServices.js";
+
+const app = express();
+
+// app.post('createAdmin' , addAdmin)
+
+app.post('/hospital/addHospital', verifyToken, addHospital);
+app.post('/hospital/add-branch', verifyToken, addBranch);
+app.get('/hospital/single-hospital', findHospitalById);
+app.put('/hospital/update-hospital', updateHospital)
+app.delete('/hospital/delete-hospital', deleteHospital)
+app.delete('/hospital/delete-department', deleteSingleDepartment)
+app.post('/hospital/new-department', addSingleDepartment)
+
+export default app;
