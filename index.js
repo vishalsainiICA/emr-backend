@@ -16,7 +16,7 @@ dbConnect();
 app.use(cors({
 
     // origin: "http://localhost:5173",  // frontend ka address
-    origin: "https://emr-system-2.onrender.com",  // frontend ka address
+    origin: "https://emr-frontend1.onrender.com",  // frontend ka address
     methods: ["GET", "POST", "PUT", "DELETE"],
     credentials: true
 }));
