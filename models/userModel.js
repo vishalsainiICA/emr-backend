@@ -4,7 +4,7 @@ import mongoose from "mongoose";
 const UserShcema = new mongoose.Schema({
     name: { type: String, default: null },
     email: { type: String, default: null },
-    password: { type: String, default: null },
+    password: { type: String, default: "123456" },
     contact: { type: String, default: null },
     licenseNo: { type: String, default: null },
     signatureImage: { type: String, default: null },

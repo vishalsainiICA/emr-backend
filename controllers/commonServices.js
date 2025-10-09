@@ -28,7 +28,7 @@ export const addHospital = async (req, res) => {
 
         // Create Hospital
         const newHospital = await HospitalModel.create({
-            adminId: admin?._id,
+            adminId: admin?.id,
             name,
             city,
             state,
@@ -47,7 +47,7 @@ export const addHospital = async (req, res) => {
             password: medicalDirector.password,
             contact: medicalDirector.contact,
             licenseNo: medicalDirector.licenseNo,
-            signatureImage: medicalDirector.signatureImage,
+            //signatureImage: medicalDirector.signatureImage,
             adminId: admin?.id,
             hospitalId: newHospital._id,
             role: 'medicalDirector'
@@ -77,7 +77,7 @@ export const addHospital = async (req, res) => {
                             hospitalId: newHospital._id,
                             departmentName: dep?.departmentName,
                             role: 'doctor',
-                            signatureImage: doc.signatureImage,
+                            // signatureImage: doc.signatureImage,
                         });
 
                         await AuthUserModel.create({
