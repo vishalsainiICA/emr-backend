@@ -1,6 +1,6 @@
 import express from "express";
 import { verifyToken } from "../utills/jwtToken.js";
-import { addBranch, addHospital, addSingleDepartment, deleteHospital, deleteSingleDepartment, findHospitalById, updateHospital } from "../controllers/commonServices.js";
+import { addBranch, addHospital, addSingleDepartment, deleteHospital, deleteSingleDepartment, findHospitalById, registerPatient, updateHospital } from "../controllers/commonServices.js";
 
 const app = express();
 
@@ -13,5 +13,10 @@ app.put('/hospital/update-hospital', updateHospital)
 app.delete('/hospital/delete-hospital', deleteHospital)
 app.delete('/hospital/delete-department', deleteSingleDepartment)
 app.post('/hospital/new-department', addSingleDepartment)
+
+
+// patient
+app.post('/patient/register-patient', registerPatient)
+
 
 export default app;

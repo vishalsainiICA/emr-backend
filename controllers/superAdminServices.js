@@ -10,7 +10,7 @@ import UserModel from '../models/userModel.js';
 
 export const signupSuperAdmin = async (req, res) => {
     try {
-        const { name, mobileNo, email, password } = req.body;
+        const { name, contact, email, password } = req.body;
 
         if (!email || !password) {
             return res.status(400).json({ message: "Email and password are required" });
@@ -27,7 +27,7 @@ export const signupSuperAdmin = async (req, res) => {
         const newUser = new UserModel({
             name,
             email,
-            mobileNo,
+            contact,
             password: password,
             role: 'super-admin',
         });
@@ -37,7 +37,7 @@ export const signupSuperAdmin = async (req, res) => {
         const authUser = await AuthUserModel.create({
             name,
             email,
-            mobileNo,
+            contact,
             password: password,
             role: 'super-admin',
             refId: newUser?._id
@@ -106,11 +106,13 @@ export const getProfile = async (req, res) => {
 }
 export const addAdmin = async (req, res) => {
     try {
-        const { name, email, mobileNo, password } = req.body
+        const { name, email, contact, password } = req.body
         const superAdmin = req.user
 
-        const checkAdmin = await UserModel.findOne({ email: email })
-        if (checkAdmin) return res.status(400).json({ message: 'admin is already exist with email' })
+        const checkAdmin = await UserModel.findOne({ email: email, isDeleted: false, role: 'admin' })
+        console.log(checkAdmin);
+
+        if (checkAdmin) return res.status(400).json({ message: 'email already exist' })
 
         // const salt = await bcrypt.genSalt(5)
         // const hashPassword = await bcrypt.hash(String(password), salt)
@@ -118,12 +120,12 @@ export const addAdmin = async (req, res) => {
             adminId: superAdmin?.id,
             role: 'admin',
             name: name,
-            contact: mobileNo,
+            contact: contact,
             email: email,
             password: password
         })
         await AuthUserModel.create({
-            mobileNo: mobileNo,
+            contact: contact,
             email: email,
             password: password,
             role: 'admin',
@@ -141,6 +143,45 @@ export const addAdmin = async (req, res) => {
 
     }
 }
+
+export const updateAdmin = async (req, res) => {
+    try {
+        const id = req.query.id;
+        if (!id) {
+            return res.status(400).json({ message: "admin id is required" });
+        }
+
+        const { name, email, password, contact } = req.body;
+        const updatedData = {};
+
+        if (name) updatedData.name = name;
+        if (email) updatedData.email = email;
+        if (contact) updatedData.contact = contact;
+        if (password) updatedData.password = password;
+
+
+        // Update both AuthUser and User documents parallelly
+        const [authAdmin, userAdmin] = await Promise.all([
+            AuthUserModel.findOneAndUpdate({ refId: id }, updatedData, { new: true }),
+            UserModel.findOneAndUpdate({ _id: id }, updatedData, { new: true })
+        ]);
+
+        if (!authAdmin && !userAdmin) {
+            return res.status(404).json({ message: "Admin not found" });
+        }
+
+        return res.status(200).json({
+            message: "Admin updated successfully",
+            data: {
+                user: userAdmin
+            }
+        });
+    } catch (error) {
+        console.error("Update admin Error:", error);
+        return res.status(500).json({ message: "Internal Server Error" });
+    }
+};
+
 
 export const getAllAdmins = async (req, res) => {
     try {
@@ -170,7 +211,7 @@ export const deleteAdmin = async (req, res) => {
         })
         if (!result) return res.status(400).json({ message: "admin not found" });
 
-        return res.status(200).json({ message: "success" });
+        return res.status(200).json({ message: "success", data: result });
     } catch (error) {
         return res.status(500).json({ message: "Internal Server Error" });
 
@@ -180,13 +221,14 @@ export const deleteAdmin = async (req, res) => {
 export const getAllHospital = async (req, res) => {
 
     try {
-        const hosptials = await HospitalModel.find({ isDeleted: false })
+        const hosptials = await HospitalModel.find({ isDeleted: false, adminId: { $ne: null } })
             .populate({
                 path: "supportedDepartments",
                 populate: {
                     path: "doctorIds",
                 },
             })
+            .populate('adminId')
             .populate("customLetterPad");
 
         return res.status(200).json({ message: 'success', data: hosptials })

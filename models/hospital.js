@@ -5,7 +5,7 @@ const hospitalSchema = new mongoose.Schema(
         adminId: {
             type: mongoose.Types.ObjectId,
             ref: "userModel", // Model ka naam PascalCase me
-            default : null
+            default: null
             //   required: true,
         },
         name: { type: String, required: true },
@@ -14,6 +14,7 @@ const hospitalSchema = new mongoose.Schema(
         pinCode: { type: String },
         address: { type: String, default: null },
         hospitalLogo: { type: String, default: null },
+        patientRegistrationLink: { type: String, default: null },
         medicalDirector: {
             type: mongoose.Types.ObjectId,
             ref: 'userModel',

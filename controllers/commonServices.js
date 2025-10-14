@@ -3,6 +3,7 @@ import AuthUserModel from "../models/authUserModel.js";
 import HospitalModel from "../models/hospital.js";
 import UserModel from "../models/userModel.js";
 import DepartmentModel from "../models/departmentModel.js";
+import PatientModel from "../models/patientModel.js";
 
 
 
@@ -21,6 +22,8 @@ export const addHospital = async (req, res) => {
         } = req.body;
 
         const admin = req.user;
+
+        console.log(admin);
 
         console.log(req.body);
 
@@ -57,7 +60,7 @@ export const addHospital = async (req, res) => {
         await AuthUserModel.create({
             email: newMedicalDirector.email,
             password: newMedicalDirector.password,
-            mobileNo: newMedicalDirector.contact,
+            contact: newMedicalDirector.contact,
             role: 'medicalDirector',
             refId: newMedicalDirector._id
         });
@@ -66,7 +69,7 @@ export const addHospital = async (req, res) => {
         const departmentIds = await Promise.all(
             supportedDepartments.map(async (dep) => {
                 const doctorIds = await Promise.all(
-                    (dep.doctor || []).map(async (doc) => {
+                    (dep.doctorIds || []).map(async (doc) => {
                         const newDoctor = await UserModel.create({
                             name: doc.name,
                             email: doc.email,
@@ -83,7 +86,7 @@ export const addHospital = async (req, res) => {
                         await AuthUserModel.create({
                             email: doc.email,
                             password: doc.password,
-                            mobileNo: doc.contact,
+                            contact: doc.contact,
                             role: 'doctor',
                             refId: newDoctor._id,
                         });
@@ -107,6 +110,8 @@ export const addHospital = async (req, res) => {
             patientCategories: patientCategories || [],
             supportedDepartments: departmentIds,
             customLetterPad: customLetterPad,
+            patientRegistrationLink: `${process.env.Frontend_LINK}/register/${newHospital._id}`
+
         });
 
         return res.status(200).json({
@@ -175,7 +180,7 @@ export const addBranch = async (req, res) => {
         await AuthUserModel.create({
             email: newMedicalDirector.email,
             password: newMedicalDirector.password,
-            mobileNo: newMedicalDirector.contact,
+            contact: newMedicalDirector.contact,
             role: 'medicalDirector',
             refId: newMedicalDirector._id
         });
@@ -201,7 +206,7 @@ export const addBranch = async (req, res) => {
                         await AuthUserModel.create({
                             email: doc.email,
                             password: doc.password,
-                            mobileNo: doc.contact,
+                            contact: doc.contact,
                             role: 'doctor',
                             refId: newDoctor._id,
                         });
@@ -248,15 +253,17 @@ export const findHospitalById = async (req, res) => {
 
     try {
         const id = req.query.hospitalId
+        console.log(id);
+
         if (!id) return res.status(400).json({ message: 'hospital id is requried' })
-        const hosptials = await HospitalModel.findOne({ _id: id, isDeleted: false }).populate({
+        const hosptial = await HospitalModel.findOne({ _id: id, isDeleted: false }).populate({
             path: "supportedDepartments",
             populate: {
                 path: "doctorIds",
             },
         }).populate('medicalDirector')
 
-        return res.status(200).json({ message: 'success', data: hosptials })
+        return res.status(200).json({ message: 'success', data: hosptial })
 
     } catch (error) {
         console.log(error);
@@ -353,7 +360,7 @@ export const addSingleDepartment = async (req, res) => {
                 await AuthUserModel.create({
                     email: doc.email,
                     password: doc.password,
-                    mobileNo: doc.contact,
+                    contact: doc.contact,
                     role: 'doctor',
                     refId: newDoctor._id,
                 });
@@ -454,3 +461,71 @@ export const updateSingleDoctor = async (req, res) => {
 
     }
 }
+
+
+export const registerPatient = async (req, res) => {
+    console.log(req.body);
+    // try {
+    //     console.log(req.body);
+
+    //     const { phone } = req.body.phone
+    //     if (phone === '') {
+    //         return res.status(400).json({
+    //             message: 'please give phone number'
+    //         })
+    //     }
+    //     const [lastPatient, existPhone, totalDoucment] = await Promise.all([
+    //         PatientModel.findOne().sort({ index: -1 }),
+    //         PatientModel.findOne({ phone: phone }),
+    //         PatientModel.countDocuments(),
+    //     ]);
+
+    //     if (existPhone) {
+    //         return res.status(409).json({
+    //             success: false,
+    //             message: "Phone Number Already Exist!"
+    //         });
+    //     }
+
+    //     const newIndex = lastPatient ? lastPatient.index + 1 : 1;
+    //     const patientUid = `${req.body.name.trim().slice(0, 3)}0${totalDoucment}`;
+
+    //     const object = {
+    //         index: newIndex,
+    //         uid: patientUid,
+    //         name: req.body.name,
+    //         gender: req.body.gender,
+    //         phone: req.body.phone,
+    //         email: req.body.email,
+    //         DOB: req.body.DOB,
+    //         nationality: req.body.nationality,
+    //         whatsApp: req.body.whatsApp,
+    //         permanentAddress: req.body.permanentAddress,
+    //         currentAddress: req.body.currentAddress,
+    //         patientCategory: req.body.patientCategory,
+    //         attendeeName: req.body.attendeeName,
+    //         attendeePhone: req.body.attendeePhone,
+    //         attendeeRelation: req.body.attendeeRelation,
+    //         specialty: req.body.specialty,
+    //         doctorId: req.body.doctorId,
+    //         age: req.body.age,
+    //         reports: req.savedFiles
+
+    //     };
+    //     const newPatient = new PatientModel(object);
+    //     await newPatient.save();
+
+    //     return res.status(200).json({
+    //         success: true,
+    //         message: "User Registered Successfully",
+    //         data: newPatient
+    //     });
+    // } catch (error) {
+    //     console.error("Error while Registering Patient:", error);
+    //     return res.status(500).json({
+    //         success: false,
+    //         message: "Internal Server Error",
+    //         error: error.message
+    //     });
+    // }
+};
