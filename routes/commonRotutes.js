@@ -1,8 +1,12 @@
 import express from "express";
 import { verifyToken } from "../utills/jwtToken.js";
+
 import { addBranch, addHospital, addSingleDepartment, deleteHospital, deleteSingleDepartment, findHospitalById, registerPatient, updateHospital } from "../controllers/commonServices.js";
+import upload from "../middlewares/multer.js";
+
 
 const app = express();
+
 
 // app.post('createAdmin' , addAdmin)
 
@@ -16,7 +20,7 @@ app.post('/hospital/new-department', addSingleDepartment)
 
 
 // patient
-app.post('/patient/register-patient', registerPatient)
+app.post('/patient/register-patient', upload.array('pastDocumnents'), registerPatient)
 
 
 export default app;

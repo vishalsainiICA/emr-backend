@@ -3,9 +3,6 @@ import mongoose from "mongoose";
 
 const patientSchema = new mongoose.Schema(
     {
-        index: {
-            type: String,
-        },
         uid: {
             type: String,
         },
@@ -24,7 +21,7 @@ const patientSchema = new mongoose.Schema(
             enum: ["Male", "Female", "Other"], // optional validation
         },
         phone: {
-            type: String, // ✅ better than Number (leading zeros safe)
+            type: String, //better than Number (leading zeros safe)
         },
         email: {
             type: String,
@@ -38,7 +35,7 @@ const patientSchema = new mongoose.Schema(
             type: String,
         },
         whatsApp: {
-            type: String, // ✅ phone should be string
+            type: String, //phone should be string
         },
         permanentAddress: {
             type: String,
@@ -53,7 +50,7 @@ const patientSchema = new mongoose.Schema(
             type: String,
         },
         attendeePhone: {
-            type: String, // ✅ use String for phone
+            type: String, // use String for phone
         },
         attendeeRelation: {
             type: String,
@@ -65,12 +62,24 @@ const patientSchema = new mongoose.Schema(
         specialty: {
             type: String,
         },
+
+        hospitalId: {
+            type: mongoose.Schema.Types.ObjectId, //usually doctor will be another model
+            ref: "hospital",
+            default: null
+        },
         doctorId: {
-            type: mongoose.Schema.Types.ObjectId, // ✅ usually doctor will be another model
-            ref: "doctor",
+            type: mongoose.Schema.Types.ObjectId, //usually doctor will be another model
+            ref: "userModel",
+            default: null
         },
         age: {
             type: Number,
+        },
+
+        pastDocuments: {
+            type: Array,
+            default: null
         },
         isDeleted: {
             type: Boolean,

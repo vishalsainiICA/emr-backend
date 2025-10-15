@@ -464,68 +464,68 @@ export const updateSingleDoctor = async (req, res) => {
 
 
 export const registerPatient = async (req, res) => {
-    console.log(req.body);
-    // try {
-    //     console.log(req.body);
+    try {
+        console.log(req.body);
 
-    //     const { phone } = req.body.phone
-    //     if (phone === '') {
-    //         return res.status(400).json({
-    //             message: 'please give phone number'
-    //         })
-    //     }
-    //     const [lastPatient, existPhone, totalDoucment] = await Promise.all([
-    //         PatientModel.findOne().sort({ index: -1 }),
-    //         PatientModel.findOne({ phone: phone }),
-    //         PatientModel.countDocuments(),
-    //     ]);
+        const pastDocuments = req?.files?.map((file) => file.path);
 
-    //     if (existPhone) {
-    //         return res.status(409).json({
-    //             success: false,
-    //             message: "Phone Number Already Exist!"
-    //         });
-    //     }
+        const { phone, hospitalId } = req.body.phone
+        if (phone === '') {
+            return res.status(400).json({
+                message: 'please give phone number'
+            })
+        }
+        const [totalDoucment, existPhone] = await Promise.all([
+            PatientModel.find({ hospitalId: hospitalId }),
+            PatientModel.findOne({ phone: phone })
+        ]);
 
-    //     const newIndex = lastPatient ? lastPatient.index + 1 : 1;
-    //     const patientUid = `${req.body.name.trim().slice(0, 3)}0${totalDoucment}`;
+        if (existPhone) {
+            return res.status(409).json({
+                success: false,
+                message: "Phone Number Already Exist!"
+            });
+        }
 
-    //     const object = {
-    //         index: newIndex,
-    //         uid: patientUid,
-    //         name: req.body.name,
-    //         gender: req.body.gender,
-    //         phone: req.body.phone,
-    //         email: req.body.email,
-    //         DOB: req.body.DOB,
-    //         nationality: req.body.nationality,
-    //         whatsApp: req.body.whatsApp,
-    //         permanentAddress: req.body.permanentAddress,
-    //         currentAddress: req.body.currentAddress,
-    //         patientCategory: req.body.patientCategory,
-    //         attendeeName: req.body.attendeeName,
-    //         attendeePhone: req.body.attendeePhone,
-    //         attendeeRelation: req.body.attendeeRelation,
-    //         specialty: req.body.specialty,
-    //         doctorId: req.body.doctorId,
-    //         age: req.body.age,
-    //         reports: req.savedFiles
+        const patientUid = `${req.body.name.trim().slice(0, 3)}_${totalDoucment}`
 
-    //     };
-    //     const newPatient = new PatientModel(object);
-    //     await newPatient.save();
+        const object = {
+            doctorId: req.body.doctorId,
+            // hospitalId : req.body.hos
+            uid: patientUid,
+            name: req.body.name,
+            gender: req.body.gender,
+            phone: req.body.phone,
+            email: req.body.email,
+            DOB: req.body.DOB,
+            nationality: req.body.nationality,
+            whatsApp: req.body.whatsApp,
+            permanentAddress: req.body.permanentAddress,
+            currentAddress: req.body.currentAddress,
+            patientCategory: req.body.patientCategory,
+            attendeeName: req.body.attendeeName,
+            attendeePhone: req.body.attendeePhone,
+            attendeeRelation: req.body.attendeeRelation,
+            specialty: req.body.specialty,
+            age: req.body.age,
+            pastDocuments: pastDocuments
 
-    //     return res.status(200).json({
-    //         success: true,
-    //         message: "User Registered Successfully",
-    //         data: newPatient
-    //     });
-    // } catch (error) {
-    //     console.error("Error while Registering Patient:", error);
-    //     return res.status(500).json({
-    //         success: false,
-    //         message: "Internal Server Error",
-    //         error: error.message
-    //     });
-    // }
+
+        };
+        const newPatient = new PatientModel(object);
+        await newPatient.save();
+
+        return res.status(200).json({
+            success: true,
+            message: "User Registered Successfully",
+            data: newPatient
+        });
+    } catch (error) {
+        console.error("Error while Registering Patient:", error);
+        return res.status(500).json({
+            success: false,
+            message: "Internal Server Error",
+            error: error.message
+        });
+    }
 };
