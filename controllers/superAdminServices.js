@@ -4,6 +4,7 @@ import { generateToken } from "../utills/jwtToken.js";
 import AuthUserModel from '../models/authUserModel.js';
 import HospitalModel from '../models/hospital.js';
 import UserModel from '../models/userModel.js';
+import PatientModel from '../models/patientModel.js';
 
 
 
@@ -237,5 +238,21 @@ export const getAllHospital = async (req, res) => {
         console.log(error);
         return res.status(500).json({ message: 'Internal Server Error' })
 
+    }
+}
+
+export const allPatients = async (req, res) => {
+    try {
+        const patients = await PatientModel.find({ isDeleted: false })
+
+        return res.status(200).json({
+            message: "success",
+            status: 200,
+            data: patients
+        });
+
+    } catch (error) {
+        console.error("Error:", error);
+        return res.status(500).json({ message: "Internal Server Error" });
     }
 }

@@ -284,12 +284,12 @@ export const updateHospital = async (req, res) => {
 
         // dynamic update object banate hain
         const updatedData = {};
-        if (name) updatedData.name = req.body.name;
-        if (city) updatedData.city = req.body.city;
-        if (state) updatedData.state = req.body.state;
-        if (pinCode) updatedData.pinCode = req.body.pinCode;
-        if (address) updatedData.address = req.body.address;
-        if (patientCategories) updatedData.patientCategories = req.body.patientCategories;
+        if (name) updatedData.name = req.body?.name;
+        if (city) updatedData.city = req.body?.city;
+        if (state) updatedData.state = req.body?.state;
+        if (pinCode) updatedData.pinCode = req.body?.pinCode;
+        if (address) updatedData.address = req.body?.address;
+        if (patientCategories) updatedData.patientCategories = req.body?.patientCategories;
 
 
         // update query
@@ -466,17 +466,23 @@ export const updateSingleDoctor = async (req, res) => {
 export const registerPatient = async (req, res) => {
     try {
         console.log(req.body);
+        const pastDocuments = req?.files?.map(file => ({
+            path: file.path,
+            uploadedAt: new Date() // optional, default bhi schema me hai
+        }));
 
-        const pastDocuments = req?.files?.map((file) => file.path);
 
-        const { phone, hospitalId } = req.body.phone
+        const { phone, hospitalId } = req.body
         if (phone === '') {
             return res.status(400).json({
                 message: 'please give phone number'
             })
+
+
         }
-        const [totalDoucment, existPhone] = await Promise.all([
-            PatientModel.find({ hospitalId: hospitalId }),
+
+        const [totalDocument, existPhone] = await Promise.all([
+            PatientModel.countDocuments({ hospitalId: hospitalId }),
             PatientModel.findOne({ phone: phone })
         ]);
 
@@ -487,27 +493,28 @@ export const registerPatient = async (req, res) => {
             });
         }
 
-        const patientUid = `${req.body.name.trim().slice(0, 3)}_${totalDoucment}`
+
+        const patientUid = `${req.body.name.trim().slice(0, 4).toUpperCase()}${totalDocument}`.trim();
 
         const object = {
-            doctorId: req.body.doctorId,
-            // hospitalId : req.body.hos
-            uid: patientUid,
-            name: req.body.name,
-            gender: req.body.gender,
-            phone: req.body.phone,
-            email: req.body.email,
-            DOB: req.body.DOB,
-            nationality: req.body.nationality,
-            whatsApp: req.body.whatsApp,
-            permanentAddress: req.body.permanentAddress,
-            currentAddress: req.body.currentAddress,
-            patientCategory: req.body.patientCategory,
-            attendeeName: req.body.attendeeName,
-            attendeePhone: req.body.attendeePhone,
-            attendeeRelation: req.body.attendeeRelation,
-            specialty: req.body.specialty,
-            age: req.body.age,
+            doctorId: req.body?.doctorId,
+            hospitalId: req.body?.hospitalId,
+            uid: patientUid.trim(),
+            name: req.body?.name,
+            gender: req.body?.gender,
+            phone: req.body?.phone,
+            email: req.body?.email,
+            DOB: req.body?.DOB,
+            nationality: req.body?.nationality,
+            whatsApp: req.body?.whatsApp,
+            permanentAddress: req.body?.permanentAddress,
+            currentAddress: req.body?.currentAddress,
+            patientCategory: req.body?.patientCategory ? JSON.parse(req.body?.patientCategory) : null,
+            attendeeName: req.body?.attendeeName,
+            attendeePhone: req.body?.attendeePhone,
+            attendeeRelation: req.body?.attendeeRelation,
+            specialty: req.body?.specialty,
+            age: req.body?.age,
             pastDocuments: pastDocuments
 
 
@@ -529,3 +536,23 @@ export const registerPatient = async (req, res) => {
         });
     }
 };
+
+
+export const patientsByHospitalById = async (req, res) => {
+
+    try {
+        const id = req.query.hospitalId
+        console.log(id);
+
+        if (!id) return res.status(400).json({ message: 'hospital id is requried' })
+        const patients = await PatientModel.find({ hospitalId: id, isDeleted: false }).populate('doctorId')
+
+        return res.status(200).json({ message: 'success', data: patients })
+
+    } catch (error) {
+        console.log(error);
+        return res.status(500).json({ message: 'Internal Server Error' })
+
+    }
+}
+

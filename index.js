@@ -15,7 +15,7 @@ const app = express();
 dbConnect();
 app.use(cors({
 
-    origin: process.env.Frontend_LINK,  // frontend ka address
+    origin: process.env.Frontend_LINK_DEV,  // frontend ka address
     // origin: "https://emr-frontend1.onrender.com",  // frontend ka address
     methods: ["GET", "POST", "PUT", "DELETE"],
     credentials: true

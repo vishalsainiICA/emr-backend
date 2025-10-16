@@ -11,6 +11,26 @@ const patientSchema = new mongoose.Schema(
             ref: "initialassessment",
             default: null,
         },
+        hospitalId: {
+            type: mongoose.Schema.Types.ObjectId, //usually doctor will be another model
+            ref: "hospital",
+            default: null
+        },
+        doctorId: {
+            type: mongoose.Schema.Types.ObjectId, //usually doctor will be another model
+            ref: "userModel",
+            default: null
+        },
+        prescribtionId: {
+            type: mongoose.Schema.Types.ObjectId, //usually doctor will be another model
+            ref: "prescribtion",
+            default: null
+        },
+
+        isPrescbribedDone: {
+            type: Boolean,
+            default: false, // patient name should not be empty
+        },
         name: {
             type: String,
             required: true, // patient name should not be empty
@@ -18,7 +38,7 @@ const patientSchema = new mongoose.Schema(
         },
         gender: {
             type: String,
-            enum: ["Male", "Female", "Other"], // optional validation
+            default: null // optional validation
         },
         phone: {
             type: String, //better than Number (leading zeros safe)
@@ -44,7 +64,10 @@ const patientSchema = new mongoose.Schema(
             type: String,
         },
         patientCategory: {
-            type: String,
+            type: Object,
+        },
+        branchName: {
+            type: String, // use String for phone
         },
         attendeeName: {
             type: String,
@@ -55,30 +78,20 @@ const patientSchema = new mongoose.Schema(
         attendeeRelation: {
             type: String,
         },
-        reports: {
-            type: [String], // array of report file names / URLs
-            default: [],
-        },
-        specialty: {
-            type: String,
-        },
-
-        hospitalId: {
-            type: mongoose.Schema.Types.ObjectId, //usually doctor will be another model
-            ref: "hospital",
-            default: null
-        },
-        doctorId: {
-            type: mongoose.Schema.Types.ObjectId, //usually doctor will be another model
-            ref: "userModel",
-            default: null
-        },
         age: {
             type: Number,
         },
 
+        addharDocumnets:[{
+            path: { type: String },
+            uploadedAt: { type: Date, default: Date.now }
+        }],
+
         pastDocuments: {
-            type: Array,
+            type: [{
+                path: { type: String },
+                uploadedAt: { type: Date, default: Date.now }
+            }],
             default: null
         },
         isDeleted: {
