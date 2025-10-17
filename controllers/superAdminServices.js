@@ -241,6 +241,36 @@ export const getAllHospital = async (req, res) => {
     }
 }
 
+export const hosptialMetrices = async (req, res) => {
+
+    try {
+        const hosptials = await HospitalModel.find({ isDeleted: false, adminId: { $ne: null } })
+            .populate({
+                path: "supportedDepartments",
+                populate: {
+                    path: "doctorIds",
+                },
+            })
+            .populate('adminId')
+            .populate("customLetterPad");
+
+        const [totalHospital, totalPatient, totalPrescbrition, totalRevenue] = await Promise.all([
+            HospitalModel.countDocuments({ isDeleted: false, adminId: { $ne: null } }),
+            PatientModel.countDocuments({ isDeleted: false }),
+            HospitalModel.find({ $count: totalRevenue }),
+            HospitalModel.find({ $count: totalRevenue }),
+
+        ])
+
+        return res.status(200).json({ message: 'success', data: hosptials })
+
+    } catch (error) {
+        console.log(error);
+        return res.status(500).json({ message: 'Internal Server Error' })
+
+    }
+}
+
 export const allPatients = async (req, res) => {
     try {
         const patients = await PatientModel.find({ isDeleted: false })

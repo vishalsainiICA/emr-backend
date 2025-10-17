@@ -13,6 +13,7 @@ const app = express.Router()
 app.post('/auth/register', signupSuperAdmin)
 app.get('/auth/profile', verifyToken, getProfile)
 app.get('/hospital/getAllHospital', getAllHospital);
+app.get('/hospital/hosptial-metrices', getAllHospital);
 app.post('/admin/add-admin', verifyToken, addAdmin)
 app.put('/admin/update-admin', verifyToken, updateAdmin)
 app.get('/admin/all-admins', verifyToken, getAllAdmins)
