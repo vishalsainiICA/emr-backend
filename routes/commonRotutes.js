@@ -10,7 +10,7 @@ const app = express();
 
 // app.post('createAdmin' , addAdmin)
 
-app.post('/hospital/addHospital', verifyToken, addHospital);
+app.post('/hospital/addHospital', addHospital);
 app.post('/hospital/add-branch', verifyToken, addBranch);
 app.get('/hospital/single-hospital', findHospitalById);
 app.put('/hospital/update-hospital', updateHospital)

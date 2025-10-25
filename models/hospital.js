@@ -24,8 +24,7 @@ const hospitalSchema = new mongoose.Schema(
         },
 
         patientCategories: [{
-            selectedType: { type: String },
-            categoryName: { type: String },
+            type: String
         }],
         supportedDepartments: [
             {

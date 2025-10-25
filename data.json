@@ -1,0 +1,62 @@
+[
+  {
+    "uid": "P1001",
+    "initialAssementId": null,
+    "hospitalId": "64f5d9c2a1b2c3d4e5f6a7b8",
+    "doctorId": "64f5d9c2a1b2c3d4e5f6a7b9",
+    "prescribtionId": null,
+    "isPrescbribedDone": false,
+    "name": "Rohit Sharma",
+    "gender": "Male",
+    "phone": "9876543210",
+    "email": "rohit.sharma@example.com",
+    "DOB": "1990-05-15T00:00:00.000Z",
+    "nationality": "Indian",
+    "whatsApp": "9876543210",
+    "permanentAddress": "123, MG Road, Delhi",
+    "currentAddress": "456, Sector 21, Gurgaon",
+    "patientCategory": { "type": "General" },
+    "branchName": "Delhi Branch",
+    "attendeeName": "Sunita Sharma",
+    "attendeePhone": "9876543211",
+    "attendeeRelation": "Wife",
+    "age": 35,
+    "addharDocumnets": [
+      { "path": "uploads/aadhar1.pdf", "uploadedAt": "2025-10-25T06:00:00.000Z" }
+    ],
+    "pastDocuments": [
+      { "path": "uploads/previous_report1.pdf", "uploadedAt": "2025-09-15T06:00:00.000Z" }
+    ],
+    "isDeleted": false
+  },
+  {
+    "uid": "P1002",
+    "initialAssementId": null,
+    "hospitalId": "64f5d9c2a1b2c3d4e5f6a7b8",
+    "doctorId": "64f5d9c2a1b2c3d4e5f6a7ba",
+    "prescribtionId": null,
+    "isPrescbribedDone": true,
+    "name": "Anjali Verma",
+    "gender": "Female",
+    "phone": "9123456780",
+    "email": "anjali.verma@example.com",
+    "DOB": "1985-11-20T00:00:00.000Z",
+    "nationality": "Indian",
+    "whatsApp": "9123456780",
+    "permanentAddress": "789, Park Street, Kolkata",
+    "currentAddress": "101, Salt Lake City, Kolkata",
+    "patientCategory": { "type": "VIP" },
+    "branchName": "Kolkata Branch",
+    "attendeeName": "Rajesh Verma",
+    "attendeePhone": "9123456781",
+    "attendeeRelation": "Husband",
+    "age": 40,
+    "addharDocumnets": [
+      { "path": "uploads/aadhar2.pdf", "uploadedAt": "2025-10-20T06:00:00.000Z" }
+    ],
+    "pastDocuments": [
+      { "path": "uploads/previous_report2.pdf", "uploadedAt": "2025-09-25T06:00:00.000Z" }
+    ],
+    "isDeleted": false
+  }
+]

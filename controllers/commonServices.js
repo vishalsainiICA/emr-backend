@@ -49,7 +49,7 @@ export const addHospital = async (req, res) => {
             email: medicalDirector.email,
             password: medicalDirector.password,
             contact: medicalDirector.contact,
-            licenseNo: medicalDirector.licenseNo,
+            licenseNo: medicalDirector.experience,
             //signatureImage: medicalDirector.signatureImage,
             adminId: admin?.id,
             hospitalId: newHospital._id,
@@ -59,7 +59,6 @@ export const addHospital = async (req, res) => {
         // Create Auth User for Medical Director
         await AuthUserModel.create({
             email: newMedicalDirector.email,
-            password: newMedicalDirector.password,
             contact: newMedicalDirector.contact,
             role: 'medicalDirector',
             refId: newMedicalDirector._id
@@ -69,7 +68,7 @@ export const addHospital = async (req, res) => {
         const departmentIds = await Promise.all(
             supportedDepartments.map(async (dep) => {
                 const doctorIds = await Promise.all(
-                    (dep.doctorIds || []).map(async (doc) => {
+                    (dep.doctors || []).map(async (doc) => {
                         const newDoctor = await UserModel.create({
                             name: doc.name,
                             email: doc.email,

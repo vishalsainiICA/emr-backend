@@ -5,6 +5,7 @@ import AuthUserModel from '../models/authUserModel.js';
 import HospitalModel from '../models/hospital.js';
 import UserModel from '../models/userModel.js';
 import PatientModel from '../models/patientModel.js';
+import PersonalAssitantModel from '../models/personalAssitantModel.js';
 
 
 
@@ -242,27 +243,29 @@ export const getAllHospital = async (req, res) => {
 }
 
 export const hosptialMetrices = async (req, res) => {
-
     try {
-        const hosptials = await HospitalModel.find({ isDeleted: false, adminId: { $ne: null } })
-            .populate({
-                path: "supportedDepartments",
-                populate: {
-                    path: "doctorIds",
-                },
-            })
-            .populate('adminId')
-            .populate("customLetterPad");
-
-        const [totalHospital, totalPatient, totalPrescbrition, totalRevenue] = await Promise.all([
+        const [TotalHospital, TotalPatient, TotalPrescbrition, TotalRevenue, TopPerformanceHospital] = await Promise.all([
             HospitalModel.countDocuments({ isDeleted: false, adminId: { $ne: null } }),
             PatientModel.countDocuments({ isDeleted: false }),
-            HospitalModel.find({ $count: totalRevenue }),
-            HospitalModel.find({ $count: totalRevenue }),
+            PersonalAssitantModel.countDocuments(),
+            HospitalModel.aggregate([
+                { $match: { isDeleted: false } },
+                { $group: { _id: null, totalRevenue: { $sum: '$totalRevenue' } } }
+            ]),
+            HospitalModel.find({ isDeleted: false }).sort({ totalRevenue: -1 }).limit(10)
 
         ])
-
-        return res.status(200).json({ message: 'success', data: hosptials })
+        return res.status(200).json({
+            message: 'success', data: {
+                "metrices": [
+                    { key: "Total Hospital", value: TotalHospital },
+                    { key: "Total Patient", value: TotalPatient },
+                    { key: "Total Prescbrition", value: TotalPrescbrition },
+                    { key: "Total Revenue", value: TotalRevenue[0]?.totalRevenue }
+                ],
+                TopPerformanceHospital
+            }
+        })
 
     } catch (error) {
         console.log(error);
@@ -273,7 +276,7 @@ export const hosptialMetrices = async (req, res) => {
 
 export const allPatients = async (req, res) => {
     try {
-        const patients = await PatientModel.find({ isDeleted: false })
+        const patients = await PatientModel.find({ isDeleted: false }).populate('hospitalId doctorId')
 
         return res.status(200).json({
             message: "success",
