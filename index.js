@@ -6,7 +6,7 @@ import { login } from './utills/jwtToken.js';
 import superAdminRoutes from './routes/superAdminRoutes.js'
 import adminRoutes from './routes/adminRoutes.js'
 import medicalDirectorRoutes from './routes/medicalDirectorRoutes.js'
-import doctorRoutes from './routes/medicalDirectorRoutes.js'
+import doctorRoutes from './routes/doctorRoutes.js'
 import commonRoutes from './routes/commonRotutes.js'
 import path from 'path'
 

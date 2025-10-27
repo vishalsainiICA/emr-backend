@@ -2,14 +2,17 @@ import mongoose from "mongoose";
 
 
 const illnessSchema = new mongoose.Schema({
-    name: {
-        type: String,
-        required: true,
-        unique: true,   // optional, ek hi illness bar bar na aaye
-        trim: true
-    }
+    illnessName: {
+        type: String
+    },
+    symptoms: [
+        {
+            type: String
+        }
+    ]
 }, { timestamps: true });
 
-const Illness = mongoose.model("illnessSuggestions", illnessSchema);
+const IllnessModel = mongoose.model("illness", illnessSchema);
 
-export default Illness;
+export default IllnessModel;
+

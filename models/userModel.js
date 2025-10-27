@@ -14,6 +14,9 @@ const UserShcema = new mongoose.Schema({
     personalAssitantId: { type: mongoose.Schema.Types.ObjectId, ref: "userModel" },
     hospitalId: { type: mongoose.Schema.Types.ObjectId, ref: "hospital" },
     adminId: { type: mongoose.Schema.Types.ObjectId, ref: "userModel" },
+    totalPatient: { type: Number, default: 0 },
+    totalPrescriptions: { type: Number, default: 0 },
+    totalLabTests: { type: Number, default: 0 },
     creationFor: { type: String, default: '' },
     role: { type: String, default: '' },
     isDeleted: {

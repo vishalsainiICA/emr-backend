@@ -1,4 +1,7 @@
-import UserModel from "../models/userModel";
+
+import IllnessModel from "../models/illnessModel.js";
+import PatientModel from "../models/patientModel.js";
+import UserModel from "../models/userModel.js";
 
 
 export const getProfile = async (req, res) => {
@@ -12,5 +15,46 @@ export const getProfile = async (req, res) => {
     } catch (error) {
         return res.status(500).json({ message: "Internal Server Error" });
 
+    }
+}
+
+export const todayPatient = async (req, res) => {
+    try {
+        const doctorId = "68fb6ce078ca74ffa4a43a5f" || req.user.id; // make sure req.user is set
+        const startOfDay = new Date();
+        startOfDay.setHours(0, 0, 0, 0);
+
+        const endOfDay = new Date();
+        endOfDay.setHours(23, 59, 59, 999);
+
+        const [doctorProfile, todayPatient] = await Promise.all([
+            UserModel.findById(doctorId),
+            PatientModel.find({
+                createdAt: { $gte: startOfDay, $lte: endOfDay },
+            }),
+        ]);
+
+        return res.status(200).json({
+            message: 'success', data: {
+                doctorProfile,
+                todayPatient
+            }
+        })
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ message: "Error fetching today's patients" });
+    }
+};
+
+export const getAllIllness = async (req, res) => {
+    try {
+
+        const illness = await IllnessModel.find()
+        return res.status(200).json({
+            message: 'success', data: illness
+        })
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ message: "Error fetching today's patients" });
     }
 }
