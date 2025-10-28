@@ -8,7 +8,7 @@ const patientSchema = new mongoose.Schema({
     height: Number,
     weight: Number,
     BP: Number,
-    bloodGroup: Number,
+    bloodGroup: String,
     o2: Number,
     heartRate: Number,
     sugar: Number,

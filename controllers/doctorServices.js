@@ -1,5 +1,6 @@
 
 import IllnessModel from "../models/illnessModel.js";
+import InitialAssesment from "../models/initialAssessmentModel.js";
 import PatientModel from "../models/patientModel.js";
 import UserModel from "../models/userModel.js";
 
@@ -28,10 +29,10 @@ export const todayPatient = async (req, res) => {
         endOfDay.setHours(23, 59, 59, 999);
 
         const [doctorProfile, todayPatient] = await Promise.all([
-            UserModel.findById(doctorId),
+            UserModel.findById(doctorId).populate('hospitalId'),
             PatientModel.find({
                 createdAt: { $gte: startOfDay, $lte: endOfDay },
-            }),
+            }).populate('initialAssementId'),
         ]);
 
         return res.status(200).json({

@@ -82,7 +82,7 @@ const patientSchema = new mongoose.Schema(
             type: Number,
         },
 
-        addharDocumnets:[{
+        addharDocumnets: [{
             path: { type: String },
             uploadedAt: { type: Date, default: Date.now }
         }],
