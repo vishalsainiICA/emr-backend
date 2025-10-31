@@ -6,6 +6,7 @@ const UserShcema = new mongoose.Schema({
     email: { type: String, default: null },
     password: { type: String, default: "123456" },
     contact: { type: String, default: null },
+    createdfor: { type: String, default: null },
     experience: { type: String, default: null },
     signatureImage: { type: String, default: null },
     departmentName: { type: String, default: null },

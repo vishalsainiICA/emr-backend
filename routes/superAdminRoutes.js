@@ -17,10 +17,10 @@ app.post('/auth/register', signupSuperAdmin)
 app.get('/auth/profile', verifyToken, getProfile)
 app.get('/hospital/getAllHospital', getAllHospital);
 app.get('/hospital/hosptial-metrices', hosptialMetrices);
-app.post('/admin/add-admin', verifyToken, addAdmin)
+app.post('/admin/add-admin', addAdmin)
 app.put('/admin/update-admin', verifyToken, updateAdmin)
-app.get('/admin/all-admins', verifyToken, getAllAdmins)
-app.delete('/admin/delete-admin', verifyToken, deleteAdmin)
+app.get('/admin/all-admins', getAllAdmins)
+app.delete('/admin/delete-admin', deleteAdmin)
 
 
 // Patients

@@ -108,12 +108,10 @@ export const getProfile = async (req, res) => {
 }
 export const addAdmin = async (req, res) => {
     try {
-        const { name, email, contact, password } = req.body
+        const { name, email, contact, password, creationfor } = req.body
         const superAdmin = req.user
 
         const checkAdmin = await UserModel.findOne({ email: email, isDeleted: false, role: 'admin' })
-        console.log(checkAdmin);
-
         if (checkAdmin) return res.status(400).json({ message: 'email already exist' })
 
         // const salt = await bcrypt.genSalt(5)
@@ -123,6 +121,7 @@ export const addAdmin = async (req, res) => {
             role: 'admin',
             name: name,
             contact: contact,
+            creationfor: creationfor,
             email: email,
             password: password
         })
@@ -223,13 +222,14 @@ export const deleteAdmin = async (req, res) => {
 export const getAllHospital = async (req, res) => {
 
     try {
-        const hosptials = await HospitalModel.find({ isDeleted: false, adminId: { $ne: null } })
+        const hosptials = await HospitalModel.find({ isDeleted: false })
             .populate({
                 path: "supportedDepartments",
                 populate: {
                     path: "doctorIds",
                 },
             })
+            .populate('medicalDirector')
             .populate('adminId')
             .populate("customLetterPad");
 
@@ -245,7 +245,7 @@ export const getAllHospital = async (req, res) => {
 export const hosptialMetrices = async (req, res) => {
     try {
         const [TotalHospital, TotalPatient, TotalPrescbrition, TotalRevenue, TopPerformanceHospital] = await Promise.all([
-            HospitalModel.countDocuments({ isDeleted: false, adminId: { $ne: null } }),
+            HospitalModel.countDocuments({ isDeleted: false }),
             PatientModel.countDocuments({ isDeleted: false }),
             PersonalAssitantModel.countDocuments(),
             HospitalModel.aggregate([

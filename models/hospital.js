@@ -10,6 +10,7 @@ const hospitalSchema = new mongoose.Schema(
         },
         totalRevenue: { type: String, default: 0 },
         totalPrescribtion: { type: String, default: 0 },
+        totalPatient: { type: String, default: 0 },
         name: { type: String, required: true },
         state: { type: String, default: null },
         city: { type: String, default: null },
