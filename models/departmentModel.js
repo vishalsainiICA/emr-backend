@@ -3,7 +3,7 @@ import mongoose from "mongoose";
 
 const departmentSchema = new mongoose.Schema({
     departmentName: { type: String, required: true, trim: true },
-    icon: { type: String, default: null },
+    image: { type: String, default: null },
     description: { type: String },
     hospitalId: {
         type: mongoose.Types.ObjectId,

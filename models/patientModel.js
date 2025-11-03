@@ -21,6 +21,10 @@ const patientSchema = new mongoose.Schema(
             ref: "userModel",
             default: null
         },
+        source: {
+            type: String,
+            default: 'web'
+        },
         prescribtionId: {
             type: mongoose.Schema.Types.ObjectId, //usually doctor will be another model
             ref: "prescribtion",

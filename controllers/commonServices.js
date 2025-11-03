@@ -69,10 +69,13 @@ export const addHospital = async (req, res) => {
             supportedDepartments.map(async (dep) => {
                 const doctorIds = await Promise.all(
                     (dep.doctors || []).map(async (doc) => {
+                        console.log("doc", doc);
                         const newDoctor = await UserModel.create({
-                            name: doc.name,
+                            name: doc.doctorName,
                             email: doc.email,
                             password: doc.password,
+                            experience: doc.experience,
+                            qualification: doc.qualification,
                             contact: doc.contact,
                             licenseNo: doc.licenseNo,
                             adminId: admin?.id,
@@ -95,6 +98,7 @@ export const addHospital = async (req, res) => {
 
                 const newDepartment = await DepartmentModel.create({
                     departmentName: dep.departmentName || null,
+                    image: dep?.image,
                     doctorIds: doctorIds,
                     adminId: admin?.id,
                     hospitalId: newHospital._id,
@@ -463,8 +467,9 @@ export const updateSingleDoctor = async (req, res) => {
 
 
 export const registerPatient = async (req, res) => {
+    console.log(req.body);
     try {
-        console.log(req.body);
+
         const pastDocuments = req?.files?.map(file => ({
             path: file.path,
             uploadedAt: new Date() // optional, default bhi schema me hai
@@ -496,7 +501,7 @@ export const registerPatient = async (req, res) => {
         const patientUid = `${req.body.name.trim().slice(0, 4).toUpperCase()}${totalDocument}`.trim();
 
         const object = {
-            doctorId: req.body?.doctorId,
+            doctorId: "68fb6ce078ca74ffa4a43a5f",
             hospitalId: req.body?.hospitalId,
             uid: patientUid.trim(),
             name: req.body?.name,

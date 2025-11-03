@@ -8,6 +8,7 @@ const UserShcema = new mongoose.Schema({
     contact: { type: String, default: null },
     createdfor: { type: String, default: null },
     experience: { type: String, default: null },
+    qualification: { type: String, default: null },
     signatureImage: { type: String, default: null },
     departmentName: { type: String, default: null },
     // doctor Id for personal Assitant creation for any doctor

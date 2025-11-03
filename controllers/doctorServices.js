@@ -59,3 +59,16 @@ export const getAllIllness = async (req, res) => {
         res.status(500).json({ message: "Error fetching today's patients" });
     }
 }
+
+export const getAllPatientRecords = async (req, res) => {
+    try {
+        const patients = await PatientModel.find({ doctorId: "68fb6ce078ca74ffa4a43a5f" })
+        return res.status(200).json({
+            message: 'success', data: patients
+        })
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ message: "Error fetching patients" });
+    }
+}
+
