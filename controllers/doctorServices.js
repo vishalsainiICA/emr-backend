@@ -32,6 +32,8 @@ export const todayPatient = async (req, res) => {
             UserModel.findById(doctorId).populate('hospitalId'),
             PatientModel.find({
                 createdAt: { $gte: startOfDay, $lte: endOfDay },
+                initialAssementId: { $ne: null }
+
             }).populate('initialAssementId'),
         ]);
 

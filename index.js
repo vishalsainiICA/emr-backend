@@ -8,6 +8,7 @@ import adminRoutes from './routes/adminRoutes.js'
 import medicalDirectorRoutes from './routes/medicalDirectorRoutes.js'
 import doctorRoutes from './routes/doctorRoutes.js'
 import commonRoutes from './routes/commonRotutes.js'
+import assitantRoutes from './routes/assitantRotues.js'
 import path from 'path'
 
 dotenv.config();
@@ -26,6 +27,7 @@ app.use('/api/super-admin', superAdminRoutes)
 app.use('/api/admin', adminRoutes)
 app.use('/api/medical-director', medicalDirectorRoutes)
 app.use('/api/doctor', doctorRoutes)
+app.use('/api/assitant', assitantRoutes)
 app.use('/api/common', commonRoutes)
 
 // to handel same login sytem with diffrent user 

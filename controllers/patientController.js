@@ -2,44 +2,6 @@ import PatientModel from "../models/patientModel.js";
 import InitialAssesment from "../models/initialAssessmentModel.js";
 import PrescribtionModel from "../models/prescribtionModel.js";
 
-export const saveInitialAssessments = async (req, res) => {
-
-    try {
-        const { uid } = req.body
-        if (!uid) {
-            return res.status(400).json({ message: 'patientId is required' })
-        }
-        const checkPatient = await PatientModel.findOne({ uid })
-
-        if (!checkPatient) {
-            return res.status(404).json({ message: 'patient is not found' })
-        }
-        const patientAssement = await InitialAssesment({
-            patientId: checkPatient._id,
-            uid: req.body.uid,
-            height: req.body.height,
-            weight: req.body.weight,
-            BP: req.body.BP,
-            bloodGroup: req.body.bloodGroup,
-            o2: req.body.o2,
-            heartRate: req.body.heartRate,
-            sugar: req.body.sugar,
-            hemoglobin: req.body.hemoglobin,
-            bodyTempreture: req.body.bodyTempreture,
-            respiratoryRate: req.body.respiratoryRate,
-
-        });
-        await patientAssement.save();
-        if (patientAssement) {
-            return res.status(200).json({
-                success: true,
-                message: "Assessment Save Successfully!"
-            })
-        }
-    } catch (error) {
-        console.log('while Initial Assessments', error);
-    }
-}
 
 export const savePrescribtionData = async (req, res) => {
     try {

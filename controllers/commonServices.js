@@ -486,23 +486,23 @@ export const registerPatient = async (req, res) => {
         }
 
         const [totalDocument, existPhone] = await Promise.all([
-            PatientModel.countDocuments({ hospitalId: hospitalId }),
+            PatientModel.countDocuments({ hospitalId: "6908988170e584cca0dad6d2" }),
             PatientModel.findOne({ phone: phone })
         ]);
 
-        if (existPhone) {
-            return res.status(409).json({
-                success: false,
-                message: "Phone Number Already Exist!"
-            });
-        }
+        // if (existPhone) {
+        //     return res.status(409).json({
+        //         success: false,
+        //         message: "Phone Number Already Exist!"
+        //     });
+        // }
 
 
         const patientUid = `${req.body.name.trim().slice(0, 4).toUpperCase()}${totalDocument}`.trim();
 
         const object = {
             doctorId: "68fb6ce078ca74ffa4a43a5f",
-            hospitalId: req.body?.hospitalId,
+            // hospitalId: req.body?.hospitalId || null,
             uid: patientUid.trim(),
             name: req.body?.name,
             gender: req.body?.gender,
