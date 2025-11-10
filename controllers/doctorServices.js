@@ -21,7 +21,7 @@ export const getProfile = async (req, res) => {
 
 export const todayPatient = async (req, res) => {
     try {
-        const doctorId = "68fb6ce078ca74ffa4a43a5f" || req.user.id; // make sure req.user is set
+        const doctorId = "69087f721f9b6973874b8dd1" || req.user.id; // make sure req.user is set
         const startOfDay = new Date();
         startOfDay.setHours(0, 0, 0, 0);
 
@@ -64,7 +64,7 @@ export const getAllIllness = async (req, res) => {
 
 export const getAllPatientRecords = async (req, res) => {
     try {
-        const patients = await PatientModel.find({ doctorId: "68fb6ce078ca74ffa4a43a5f" })
+        const patients = await PatientModel.find({ doctorId: "69087f721f9b6973874b8dd1" })
         return res.status(200).json({
             message: 'success', data: patients
         })

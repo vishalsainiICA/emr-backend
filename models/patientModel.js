@@ -53,10 +53,13 @@ const patientSchema = new mongoose.Schema(
             trim: true,
         },
         DOB: {
-            type: Date,
+            type: String,
         },
         nationality: {
             type: String,
+        },    
+        addharNo: {
+            type: String, //phone should be string
         },
         whatsApp: {
             type: String, //phone should be string

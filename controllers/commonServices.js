@@ -486,7 +486,7 @@ export const registerPatient = async (req, res) => {
         }
 
         const [totalDocument, existPhone] = await Promise.all([
-            PatientModel.countDocuments({ hospitalId: "6908988170e584cca0dad6d2" }),
+            PatientModel.countDocuments({ hospitalId: "690eeab9521e26ba703e4962" }),
             PatientModel.findOne({ phone: phone })
         ]);
 
@@ -501,7 +501,7 @@ export const registerPatient = async (req, res) => {
         const patientUid = `${req.body.name.trim().slice(0, 4).toUpperCase()}${totalDocument}`.trim();
 
         const object = {
-            doctorId: "68fb6ce078ca74ffa4a43a5f",
+            doctorId: "69087f721f9b6973874b8dd1",
             // hospitalId: req.body?.hospitalId || null,
             uid: patientUid.trim(),
             name: req.body?.name,

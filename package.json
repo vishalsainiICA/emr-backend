@@ -6,6 +6,7 @@
   "dependencies": {
     "accepts": "^2.0.0",
     "append-field": "^1.0.0",
+    "axios": "^1.13.2",
     "bcryptjs": "^3.0.2",
     "body-parser": "^2.2.0",
     "bson": "^6.10.4",
