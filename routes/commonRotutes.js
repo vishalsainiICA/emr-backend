@@ -28,7 +28,10 @@ app.get('/hospital/all-patients', patientsByHospitalById)
 
 
 // patient
-app.post('/patient/register-patient', upload.array('pastDocumnents'), registerPatient)
+app.post('/patient/register-patient', upload.fields([{ name: 'documents' },
+{ name: "addharfront" },
+{ name: "addharback" }
+]), registerPatient)
 
 
 

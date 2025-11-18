@@ -23,6 +23,13 @@ app.use(cors({
 }));
 app.use(express.json());
 
+// Data fetched successfully for SBIN
+// Data fetched successfully for RELIANCE
+// error Can only compare identically-labeled Series objects
+// error Can only compare identically-labeled Series objects
+// All Threads is completed for this timeframe15m
+// INFO:app.logger:[15m] Processed strategies.
+
 app.use('/api/super-admin', superAdminRoutes)
 app.use('/api/admin', adminRoutes)
 app.use('/api/medical-director', medicalDirectorRoutes)

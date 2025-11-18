@@ -57,7 +57,7 @@ const patientSchema = new mongoose.Schema(
         },
         nationality: {
             type: String,
-        },    
+        },
         addharNo: {
             type: String, //phone should be string
         },
@@ -89,15 +89,16 @@ const patientSchema = new mongoose.Schema(
             type: Number,
         },
 
-        addharDocumnets: [{
-            path: { type: String },
+        addharDocumnets: {
+            addharfrontPath: { type: String },
+            addharbackPath: { type: String },
             uploadedAt: { type: Date, default: Date.now }
-        }],
+        },
 
         pastDocuments: {
             type: [{
-                path: { type: String },
-                uploadedAt: { type: Date, default: Date.now }
+                category: { type: String },
+                files: { type: Array }
             }],
             default: null
         },

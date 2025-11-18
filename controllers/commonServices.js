@@ -31,11 +31,11 @@ export const addHospital = async (req, res) => {
 
         // Create Hospital
         console.log(req.files);
-        
+
         const directorPath = req.files?.medicalDirectorImage?.[0]?.path?.replace(/\\/g, "/") || null;
         const watermarkPath = req.files?.watermarkImg?.[0]?.path?.replace(/\\/g, "/") || null;
 
-        console.log("directorpath",directorPath);
+        console.log("directorpath", directorPath);
 
 
         const newHospital = await HospitalModel.create({
@@ -479,12 +479,6 @@ export const registerPatient = async (req, res) => {
     console.log(req.body);
     try {
 
-        const pastDocuments = req?.files?.map(file => ({
-            path: file.path,
-            uploadedAt: new Date() // optional, default bhi schema me hai
-        }));
-
-
         const { phone, hospitalId } = req.body
         if (phone === '') {
             return res.status(400).json({
@@ -508,10 +502,36 @@ export const registerPatient = async (req, res) => {
 
 
         const patientUid = `${req.body.name.trim().slice(0, 4).toUpperCase()}${totalDocument}`.trim();
+        const categories = req.body.categories;
+        const counts = req.body.fileCount;
+        const files = req.files.documents;
+        const addharfrontPath = req.files.addharfront[0].path.replace(/\\/g, "/")
+        const addharbackPath = req.files.addharback[0].path.replace(/\\/g, "/")
+
+        let finalData = []
+        let index = 0;
+        for (let i = 0; i < categories.length; i++) {
+            const category = categories[i];
+            const count = parseInt(counts[i]);
+
+            let catFiles = [];
+
+            for (let j = 0; j < count; j++) {
+                catFiles.push({
+                    path: files[index].path.replace(/\\/g, "/"),
+                });
+                index++;
+            }
+
+            finalData.push({
+                category,
+                files: catFiles
+            });
+        }
 
         const object = {
-            doctorId: "69087f721f9b6973874b8dd1",
-            // hospitalId: req.body?.hospitalId || null,
+            doctorId: req.body.doctorId,
+            hospitalId: req.body?.hospitalId || null,
             uid: patientUid.trim(),
             name: req.body?.name,
             gender: req.body?.gender,
@@ -527,19 +547,26 @@ export const registerPatient = async (req, res) => {
             attendeePhone: req.body?.attendeePhone,
             attendeeRelation: req.body?.attendeeRelation,
             specialty: req.body?.specialty,
+            addharDocumnets: {
+                addharfrontPath,
+                addharbackPath
+            },
             age: req.body?.age,
-            pastDocuments: pastDocuments
+            pastDocuments: finalData
 
 
         };
         const newPatient = new PatientModel(object);
         await newPatient.save();
 
-        return res.status(200).json({
-            success: true,
-            message: "User Registered Successfully",
-            data: newPatient
-        });
+        console.log(newPatient);
+
+
+        // return res.status(200).json({
+        //     success: true,
+        //     message: "User Registered Successfully",
+        //     data: newPatient
+        // });
     } catch (error) {
         console.error("Error while Registering Patient:", error);
         return res.status(500).json({
