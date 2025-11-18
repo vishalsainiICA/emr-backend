@@ -10,7 +10,14 @@ const app = express();
 
 // app.post('createAdmin' , addAdmin)
 
-app.post('/hospital/addHospital', addHospital);
+app.post('/hospital/addHospital', upload.fields([
+    {
+        name: "medicalDirectorImage", maxCount: 1
+    },
+    {
+        name: "watermarkImg", maxCount: 1
+    }
+]), addHospital);
 app.post('/hospital/add-branch', verifyToken, addBranch);
 app.get('/hospital/single-hospital', findHospitalById);
 app.put('/hospital/update-hospital', updateHospital)

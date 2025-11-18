@@ -30,6 +30,14 @@ export const addHospital = async (req, res) => {
 
 
         // Create Hospital
+        console.log(req.files);
+        
+        const directorPath = req.files?.medicalDirectorImage?.[0]?.path?.replace(/\\/g, "/") || null;
+        const watermarkPath = req.files?.watermarkImg?.[0]?.path?.replace(/\\/g, "/") || null;
+
+        console.log("directorpath",directorPath);
+
+
         const newHospital = await HospitalModel.create({
             adminId: admin?.id,
             name,
@@ -53,6 +61,7 @@ export const addHospital = async (req, res) => {
             //signatureImage: medicalDirector.signatureImage,
             adminId: admin?.id,
             hospitalId: newHospital._id,
+            image: directorPath,
             role: 'medicalDirector'
         });
 
@@ -117,10 +126,10 @@ export const addHospital = async (req, res) => {
 
         });
 
-        return res.status(200).json({
-            message: "New hospital added successfully",
-            hospitalId: newHospital._id
-        });
+        // return res.status(200).json({
+        //     message: "New hospital added successfully",
+        //     hospitalId: newHospital._id
+        // });
 
     } catch (error) {
         console.error("Error in addHospital:", error);

@@ -21,6 +21,7 @@ const UserShcema = new mongoose.Schema({
     totalLabTests: { type: Number, default: 0 },
     creationFor: { type: String, default: '' },
     role: { type: String, default: '' },
+    image: { type: String, default: '' },
     isDeleted: {
         type: Boolean,
         default: false,
