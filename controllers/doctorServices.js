@@ -64,7 +64,7 @@ export const getAllIllness = async (req, res) => {
 
 export const getAllPatientRecords = async (req, res) => {
     try {
-        const patients = await PatientModel.find({ doctorId: "69087f721f9b6973874b8dd1" })
+        const patients = await PatientModel.find({ initialAssementId: { $ne: null } }).populate("initialAssementId")
         return res.status(200).json({
             message: 'success', data: patients
         })

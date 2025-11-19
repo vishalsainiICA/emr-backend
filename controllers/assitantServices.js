@@ -44,3 +44,16 @@ export const saveInitialAssessments = async (req, res) => {
         console.log('while Initial Assessments', error);
     }
 }
+
+
+export const getAllPatientRecords = async (req, res) => {
+    try {
+        const patients = await PatientModel.find()
+        return res.status(200).json({
+            message: 'success', data: patients
+        })
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ message: "Error fetching patients" });
+    }
+}
