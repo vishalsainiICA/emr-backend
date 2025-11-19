@@ -2,6 +2,7 @@
 import IllnessModel from "../models/illnessModel.js";
 import InitialAssesment from "../models/initialAssessmentModel.js";
 import PatientModel from "../models/patientModel.js";
+import PrescribtionModel from "../models/prescribtionModel.js";
 import UserModel from "../models/userModel.js";
 
 
@@ -64,13 +65,59 @@ export const getAllIllness = async (req, res) => {
 
 export const getAllPatientRecords = async (req, res) => {
     try {
-        const patients = await PatientModel.find({ initialAssementId: { $ne: null } }).populate("initialAssementId")
+        const patients = await PatientModel.find({ initialAssementId: { $ne: null } }).populate("initialAssementId hospitalId doctorId")
         return res.status(200).json({
             message: 'success', data: patients
         })
     } catch (error) {
         console.error(error);
         res.status(500).json({ message: "Error fetching patients" });
+    }
+}
+
+export const savePrescribtion = async (req, res) => {
+    console.log(req.body);
+    console.log(req.file);
+
+    try {
+        const obj =
+        {
+            "patientId": req.body.patientId,
+            "initialAssementId": req.body.initialAssementId,
+            "doctorId": req.body.initialAssementId,
+            "hospitalId": req.body.hospitalId,
+            "prescriptionType": req.body.type,
+            "prescriptionMediciene": req.body.prescriptionMediciene,
+            "illness": req.body.illness,
+            "symptoms": req.body.symptoms,
+            "labTest": req.body.labTest,
+            "prescriptionImage": req.file.path.replace(/\\/g, "/"),
+        }
+
+        const pris = await PrescribtionModel.create(obj)
+
+        const result = await PatientModel.findByIdAndUpdate(req.body.patientId, {
+            $set: {
+                prescribtionId: pris._id
+            }
+        }, {
+            new: true
+        })
+
+        if (result) {
+            return res.status(200).json({
+                message: 'success', data: result
+            })
+        }
+        else {
+            return res.status(300).json({
+                message: 'Kindly Data not Updated'
+            })
+        }
+
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ message: "Internal Server Error" });
     }
 }
 

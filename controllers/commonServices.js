@@ -558,15 +558,11 @@ export const registerPatient = async (req, res) => {
         };
         const newPatient = new PatientModel(object);
         await newPatient.save();
-
-        console.log(newPatient);
-
-
-        // return res.status(200).json({
-        //     success: true,
-        //     message: "User Registered Successfully",
-        //     data: newPatient
-        // });
+        return res.status(200).json({
+            success: true,
+            message: "User Registered Successfully",
+            data: newPatient
+        });
     } catch (error) {
         console.error("Error while Registering Patient:", error);
         return res.status(500).json({

@@ -276,7 +276,7 @@ export const hosptialMetrices = async (req, res) => {
 
 export const allPatients = async (req, res) => {
     try {
-        const patients = await PatientModel.find({ isDeleted: false }).populate('hospitalId doctorId')
+        const patients = await PatientModel.find({ isDeleted: false }).populate('hospitalId doctorId prescribtionId')
 
         return res.status(200).json({
             message: "success",

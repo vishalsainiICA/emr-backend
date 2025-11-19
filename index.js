@@ -40,13 +40,7 @@ app.use('/api/common', commonRoutes)
 // to handel same login sytem with diffrent user 
 app.post('/api/login', login)
 
-const __dirname = path.resolve();
-
-app.use("/uploads",express.static("uploads"));
-
-app.get('/*allRoutes', (req, res) => {
-    res.sendFile(path.resolve(__dirname, "frontend", "dist", "index.html"));
-});
+app.use("/uploads", express.static("uploads"));
 
 app.listen(process.env.PORT, () => {
     console.log('Server Runs Successfully on', process.env.PORT)

@@ -14,18 +14,35 @@ const prescribtionShehma = mongoose.Schema({
         type: mongoose.Types.ObjectId,
         ref: 'doctor'
     },
+    hospitalId: {
+        type: mongoose.Types.ObjectId,
+        ref: 'hospital'
+    },
     prescriptionType: {
         // final prescription || provisional prescription
         type: String,
         default: null
     },
 
+    illness: {
+        type: Array,
+        default: null
+    },
+    symptoms: {
+        type: Array,
+        default: null
+    },
     prescriptionMediciene: {
         type: Array,
         default: null
     },
+
     labTest: {
         type: Array,
+        default: null
+    },
+    prescriptionImage: {
+        type: String,
         default: null
     },
     followUp: {
@@ -36,6 +53,8 @@ const prescribtionShehma = mongoose.Schema({
         type: Boolean,
         default: false,
     },
+
+
 
 }, {
     timestamps: true
