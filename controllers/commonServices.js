@@ -510,7 +510,7 @@ export const registerPatient = async (req, res) => {
 
         let finalData = []
         let index = 0;
-        for (let i = 0; i < categories.length; i++) {
+        for (let i = 0; i < categories?.length; i++) {
             const category = categories[i];
             const count = parseInt(counts[i]);
 

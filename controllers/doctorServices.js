@@ -86,7 +86,7 @@ export const savePrescribtion = async (req, res) => {
             "initialAssementId": req.body.initialAssementId,
             "doctorId": req.body.initialAssementId,
             "hospitalId": req.body.hospitalId,
-            "prescriptionType": req.body.type,
+            "prescriptionType": req.body.prescriptionType,
             "prescriptionMediciene": req.body.prescriptionMediciene,
             "illness": req.body.illness,
             "symptoms": req.body.symptoms,
