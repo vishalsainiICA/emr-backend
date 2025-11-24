@@ -49,7 +49,8 @@ export const verifyToken = (req, res, next) => {
 
 export const login = async (req, res) => {
     try {
-        const { email, password } = req.body
+        const email = req.body?.email
+        const password = req.body?.password
         const user = await AuthUserModel.findOne({ email });
         if (!user) return res.status(400).json({ message: 'Email Not Found' }).populate('refId');
         console.log(user);

@@ -126,10 +126,10 @@ export const addHospital = async (req, res) => {
 
         });
 
-        // return res.status(200).json({
-        //     message: "New hospital added successfully",
-        //     hospitalId: newHospital._id
-        // });
+        return res.status(200).json({
+            message: "New hospital added successfully",
+            hospitalId: newHospital._id
+        });
 
     } catch (error) {
         console.error("Error in addHospital:", error);
