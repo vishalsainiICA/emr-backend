@@ -4,8 +4,8 @@ const authUserSchema = mongoose.Schema({
     email: { type: String },
     contact: { type: String },
     password: { type: String },
-    role: { type: String, enum: ['super-admin', 'admin', 'medicalDirector', 'doctor', 'personalAssitant'] },
-    refId: { type: mongoose.Types.ObjectId, default: null },
+    role: { type: String, enum: ['superadmin', 'admin', 'medicalDirector', 'doctor', 'personalAssitant'] },
+    refId: { type: mongoose.Types.ObjectId, ref: "userModel", default: null },
     isDeleted: {
         type: Boolean,
         default: false,

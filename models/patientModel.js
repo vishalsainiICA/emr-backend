@@ -44,6 +44,10 @@ const patientSchema = new mongoose.Schema(
             type: String,
             default: null // optional validation
         },
+        status: {
+            type: String,
+            default: "scheduled"
+        },
         phone: {
             type: String, //better than Number (leading zeros safe)
         },

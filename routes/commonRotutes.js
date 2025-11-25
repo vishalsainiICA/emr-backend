@@ -1,8 +1,9 @@
 import express from "express";
 import { verifyToken } from "../utills/jwtToken.js";
 
-import { addBranch, addHospital, addSingleDepartment, deleteHospital, deleteSingleDepartment, findHospitalById, patientsByHospitalById, registerPatient, updateHospital } from "../controllers/commonServices.js";
+import { addBranch, addHospital, addPersonalAssitant, addSingleDepartment, deleteHospital, deleteSingleDepartment, findHospitalById, patientsByHospitalById, registerPatient, updateHospital } from "../controllers/commonServices.js";
 import upload from "../middlewares/multer.js";
+
 
 
 const app = express();
@@ -31,6 +32,7 @@ app.get('/hospital/all-patients', patientsByHospitalById)
 app.post('/patient/register-patient', upload.fields([{ name: 'documents' },
 { name: "addharfront" },
 { name: "addharback" }
+
 ]), registerPatient)
 
 

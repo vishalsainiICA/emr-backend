@@ -51,15 +51,24 @@ export const login = async (req, res) => {
     try {
         const email = req.body?.email
         const password = req.body?.password
-        const user = await AuthUserModel.findOne({ email });
-        if (!user) return res.status(400).json({ message: 'Email Not Found' }).populate('refId');
+
+        console.log(req.body);
+
+
+        if (!email || !password) return res.status(400).json({ message: 'Invalid credentials' })
+        const user = await AuthUserModel.findOne({ email }).populate('refId');;
+        if (!user) return res.status(400).json({ message: 'Email Not Found' })
         console.log(user);
 
-        const isMatch = String(user.password) === String(password)
+        const isMatch = String(user?.refId?.password) === String(password)
+        // console.log(isMatch);
+        // console.log( String(user?.refId?.password));
+        // console.log( String(password));
+
         if (!isMatch) return res.status(400).json({ message: 'Invalid credentials' });
 
         let profile = null
-        if (user?.role === "super-admin") {
+        if (user?.role === "superadmin") {
             profile = await UserModel.findById(user?.refId)
         }
         else if (user?.role === "admin") {
@@ -72,7 +81,7 @@ export const login = async (req, res) => {
             profile = await UserModel.findById(user?.refId)
         }
         else if (user?.role === "personalAssitant") {
-            profile = await PersonalAssitantModel.findById(user?.refId)
+            profile = await UserModel.findById(user?.refId)
         }
 
         if (!profile) {
@@ -87,7 +96,7 @@ export const login = async (req, res) => {
 
         return res.status(200).json({
             message: 'Login successful',
-            data: profile,  // full profile is sent here
+            role: profile?.role,  // full profile is sent here
             token: token
         });
     } catch (error) {

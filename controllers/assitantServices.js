@@ -1,5 +1,6 @@
 import InitialAssesment from "../models/initialAssessmentModel.js"
 import PatientModel from "../models/patientModel.js";
+import UserModel from "../models/userModel.js";
 
 
 export const saveInitialAssessments = async (req, res) => {
@@ -48,12 +49,30 @@ export const saveInitialAssessments = async (req, res) => {
 
 export const getAllPatientRecords = async (req, res) => {
     try {
-        const patients = await PatientModel.find()
+        const user = req.user
+        const profile = await UserModel.findById(user?.id)
+        if (!profile) return res.status(404).json({ message: "user not found" });
+        const patients = await PatientModel.find({ doctorId: profile?.doctorId })
+
         return res.status(200).json({
             message: 'success', data: patients
         })
     } catch (error) {
         console.error(error);
         res.status(500).json({ message: "Error fetching patients" });
+    }
+}
+
+export const getProfile = async (req, res) => {
+    console.log(req.user);
+    try {
+        const user = req.user
+        const profile = await UserModel.findById(user?.id).populate("doctorId")
+        if (!profile) return res.status(404).json({ message: "user not found" });
+
+        return res.status(200).json({ message: "Success", data: profile });
+    } catch (error) {
+        return res.status(500).json({ message: "Internal Server Error" });
+
     }
 }

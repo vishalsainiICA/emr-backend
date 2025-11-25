@@ -14,8 +14,8 @@ export const signupSuperAdmin = async (req, res) => {
     try {
         const { name, contact, email, password } = req.body;
 
-        if (!email || !password) {
-            return res.status(400).json({ message: "Email and password are required" });
+        if (!email) {
+            return res.status(400).json({ message: "Email are required" });
         }
 
         const existingUser = await UserModel.findOne({ email });
@@ -23,15 +23,14 @@ export const signupSuperAdmin = async (req, res) => {
             return res.status(400).json({ message: "Email already registered" });
         }
 
-        const salt = await bcrypt.genSalt(10);
-        const hashPassword = await bcrypt.hash(String(password), salt);
+        // const salt = await bcrypt.genSalt(10);
+        // const hashPassword = await bcrypt.hash(String(password), salt);
 
         const newUser = new UserModel({
             name,
             email,
             contact,
-            password: password,
-            role: 'super-admin',
+            role: 'superadmin',
         });
 
         await newUser.save();
@@ -41,7 +40,7 @@ export const signupSuperAdmin = async (req, res) => {
             email,
             contact,
             password: password,
-            role: 'super-admin',
+            role: 'superadmin',
             refId: newUser?._id
         })
 
@@ -218,6 +217,25 @@ export const deleteAdmin = async (req, res) => {
 
     }
 }
+export const deletePa = async (req, res) => {
+    try {
+        const id = req.query.id
+        if (!id) {
+            return res.status(400).json({ message: "id is required" });
+        }
+        const result = await UserModel.findByIdAndUpdate(id, {
+            $set: {
+                personalAssitantId: null
+            }
+        }, { new: true })
+        if (!result) return res.status(400).json({ message: "doctor not found" });
+
+        return res.status(200).json({ message: "success", data: result });
+    } catch (error) {
+        return res.status(500).json({ message: "Internal Server Error" });
+
+    }
+}
 
 export const getAllHospital = async (req, res) => {
 
@@ -244,13 +262,13 @@ export const getAllHospital = async (req, res) => {
 
 export const hosptialMetrices = async (req, res) => {
     try {
-        const [TotalHospital, TotalPatient, TotalPrescbrition, TotalRevenue, TopPerformanceHospital] = await Promise.all([
+        const [TotalHospital, TotalPatient, TotalRevenue, TopPerformanceHospital] = await Promise.all([
             HospitalModel.countDocuments({ isDeleted: false }),
             PatientModel.countDocuments({ isDeleted: false }),
-            PersonalAssitantModel.countDocuments(),
+
             HospitalModel.aggregate([
                 { $match: { isDeleted: false } },
-                { $group: { _id: null, totalRevenue: { $sum: '$totalRevenue' } } }
+                { $group: { _id: null, totalRevenue: { $sum: '$totalRevenue' }, totalPrescbrition: { $sum: '$totalPrescribtion' } } }
             ]),
             HospitalModel.find({ isDeleted: false }).sort({ totalRevenue: -1 }).limit(10)
 
@@ -260,7 +278,7 @@ export const hosptialMetrices = async (req, res) => {
                 "metrices": [
                     { key: "Total Hospital", value: TotalHospital },
                     { key: "Total Patient", value: TotalPatient },
-                    { key: "Total Prescbrition", value: TotalPrescbrition },
+                    { key: "Total Prescbrition", value: TotalRevenue[0]?.totalPrescbrition },
                     { key: "Total Revenue", value: TotalRevenue[0]?.totalRevenue }
                 ],
                 TopPerformanceHospital
@@ -277,6 +295,28 @@ export const hosptialMetrices = async (req, res) => {
 export const allPatients = async (req, res) => {
     try {
         const patients = await PatientModel.find({ isDeleted: false }).populate('hospitalId doctorId prescribtionId initialAssementId')
+
+        return res.status(200).json({
+            message: "success",
+            status: 200,
+            data: patients
+        });
+
+    } catch (error) {
+        console.error("Error:", error);
+        return res.status(500).json({ message: "Internal Server Error" });
+    }
+}
+
+export const hosptialPatients = async (req, res) => {
+    try {
+        const id = req.query.id
+        if (!id) {
+            return res.status(400).json({ message: "id is required" });
+        }
+        // console.log(id);
+
+        const patients = await PatientModel.find({ isDeleted: false, hospitalId: id }).populate('hospitalId doctorId prescribtionId initialAssementId')
 
         return res.status(200).json({
             message: "success",

@@ -592,3 +592,63 @@ export const patientsByHospitalById = async (req, res) => {
     }
 }
 
+
+
+export const addPersonalAssitant = async (req, res) => {
+    try {
+        console.log(req.body);
+
+        const { name, email, contact, password, creationfor, docId } = req.body
+        const superAdmin = req.user
+
+        const checkAdmin = await UserModel.findOne({ email: email, isDeleted: false, role: 'admin' })
+        if (checkAdmin) return res.status(400).json({ message: 'email already exist' })
+
+        // const salt = await bcrypt.genSalt(5)
+        // const hashPassword = await bcrypt.hash(String(password), salt)
+        const newPa = await UserModel.create({
+            adminId: superAdmin?.id,
+            role: 'personalAssitant',
+            name: name,
+            contact: contact,
+            creationfor: creationfor,
+            email: email,
+            password: password,
+            doctorId: docId
+        })
+        await AuthUserModel.create({
+            contact: contact,
+            email: email,
+            password: password,
+            role: 'personalAssitant',
+            refId: newPa._id
+        })
+        const updated = await UserModel.findByIdAndUpdate(docId, {
+            $set: {
+                personalAssitantId: newPa._id
+            }
+        }, {
+            new: true
+        })
+
+        console.log("updted", updated);
+
+        if (updated) {
+            return res.status(200).json({
+                message: "New Personal Assitant added successfully",
+                status: 200,
+                adminId: newPa._id
+            })
+        }
+        else {
+            return res.status(400).json({
+                message: "Pa is not updated",
+            })
+        }
+
+    } catch (error) {
+        console.error("Error:", error);
+        return res.status(500).json({ message: "Internal Server Error" });
+
+    }
+}

@@ -39,6 +39,9 @@ app.use('/api/common', commonRoutes)
 
 // to handel same login sytem with diffrent user 
 app.post('/api/login', login)
+app.get("/", (req, res) => {
+    res.status(200).send("Server is Running")
+})
 
 app.use("/uploads", express.static("uploads"));
 
