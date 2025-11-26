@@ -618,9 +618,9 @@ export const patientsByHospitalById = async (req, res) => {
 
 export const addPersonalAssitant = async (req, res) => {
     try {
-        console.log(req.body);
 
-        const { name, email, contact, password, creationfor, docId } = req.body
+
+        const { name, email, contact, password, creationfor, docId, hosId } = req.body
         const superAdmin = req.user
 
         const checkAdmin = await UserModel.findOne({ email: email, isDeleted: false, role: 'admin' })
@@ -636,6 +636,7 @@ export const addPersonalAssitant = async (req, res) => {
             creationfor: creationfor,
             email: email,
             password: password,
+            hospitalId: hosId,
             doctorId: docId
         })
         await AuthUserModel.create({
