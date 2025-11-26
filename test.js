@@ -51,7 +51,7 @@ async function runOCR() {
     console.log("📤 Uploading Aadhaar back image...");
     const backText = await extractTextFromImage(backPath);
 
-    console.log("\n✅ OCR RESULTS");
+    console.log("\n OCR RESULTS");
     console.log("📄 Front Text:\n", frontText);
     console.log("\n📄 Back Text:\n", backText);
 }

@@ -16,7 +16,7 @@ mongoose.connection.once('open', () => {
 export const upload = multer({
     storage: multer.memoryStorage(),
     limits: {
-        fileSize: 30 * 1024 * 1024, // ✅ 30 MB is a good sweet spot
+        fileSize: 30 * 1024 * 1024, //  30 MB is a good sweet spot
     },
 });
 

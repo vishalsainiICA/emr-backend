@@ -46,7 +46,7 @@ const patientSchema = new mongoose.Schema(
         },
         status: {
             type: String,
-            default: "scheduled"
+            default: "Scheduled"
         },
         phone: {
             type: String, //better than Number (leading zeros safe)
@@ -85,6 +85,9 @@ const patientSchema = new mongoose.Schema(
         },
         attendeePhone: {
             type: String, // use String for phone
+        },
+        cancelReason: {
+            type: String,
         },
         attendeeRelation: {
             type: String,

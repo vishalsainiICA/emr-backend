@@ -6,6 +6,7 @@ import HospitalModel from '../models/hospital.js';
 import UserModel from '../models/userModel.js';
 import PatientModel from '../models/patientModel.js';
 import PersonalAssitantModel from '../models/personalAssitantModel.js';
+import PrescribtionModel from '../models/prescribtionModel.js';
 
 
 
@@ -262,15 +263,15 @@ export const getAllHospital = async (req, res) => {
 
 export const hosptialMetrices = async (req, res) => {
     try {
-        const [TotalHospital, TotalPatient, TotalRevenue, TopPerformanceHospital] = await Promise.all([
+        const [TotalHospital, TotalPatient, TotalRevenue, TopPerformanceHospital, TotalPrescbrition] = await Promise.all([
             HospitalModel.countDocuments({ isDeleted: false }),
             PatientModel.countDocuments({ isDeleted: false }),
 
             HospitalModel.aggregate([
                 { $match: { isDeleted: false } },
-                { $group: { _id: null, totalRevenue: { $sum: '$totalRevenue' }, totalPrescbrition: { $sum: '$totalPrescribtion' } } }
             ]),
-            HospitalModel.find({ isDeleted: false }).sort({ totalRevenue: -1 }).limit(10)
+            HospitalModel.find({ isDeleted: false }).sort({ totalRevenue: -1 }).limit(10).populate("medicalDirector"),
+            PrescribtionModel.countDocuments({ isDeleted: false }),
 
         ])
         return res.status(200).json({
@@ -278,7 +279,7 @@ export const hosptialMetrices = async (req, res) => {
                 "metrices": [
                     { key: "Total Hospital", value: TotalHospital },
                     { key: "Total Patient", value: TotalPatient },
-                    { key: "Total Prescbrition", value: TotalRevenue[0]?.totalPrescbrition },
+                    { key: "Total Prescbrition", value: TotalPrescbrition },
                     { key: "Total Revenue", value: TotalRevenue[0]?.totalRevenue }
                 ],
                 TopPerformanceHospital

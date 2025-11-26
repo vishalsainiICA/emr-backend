@@ -275,7 +275,29 @@ export const findHospitalById = async (req, res) => {
             },
         }).populate('medicalDirector')
 
-        return res.status(200).json({ message: 'success', data: hosptial })
+
+        const [
+            TotalPatient,
+            TotalPrescrition,
+            TotalRevenue
+        ] = await Promise.all([
+
+            // Total Patients
+            PatientModel.countDocuments({ hospitalId: id }),
+            // Total Prescriptions
+            PatientModel.countDocuments({ hospitalId: id, prescribtionId: { $ne: null } }),
+            HospitalModel.aggregate([
+                { $match: { isDeleted: false } },
+            ]),
+        ]);
+
+        return res.status(200).json({
+            message: 'success', data: hosptial, metrices: {
+                TotalPatient,
+                TotalPrescrition,
+                TotalRevenue,
+            }
+        })
 
     } catch (error) {
         console.log(error);
