@@ -4,6 +4,7 @@ import HospitalModel from "../models/hospital.js";
 import UserModel from "../models/userModel.js";
 import DepartmentModel from "../models/departmentModel.js";
 import PatientModel from "../models/patientModel.js";
+import { populate } from "dotenv";
 
 
 
@@ -272,6 +273,9 @@ export const findHospitalById = async (req, res) => {
             path: "supportedDepartments",
             populate: {
                 path: "doctorIds",
+                populate: {
+                    path: "personalAssitantId"
+                }
             },
         }).populate('medicalDirector')
 
@@ -620,8 +624,11 @@ export const addPersonalAssitant = async (req, res) => {
     try {
 
 
-        const { name, email, contact, password, creationfor, docId, hosId } = req.body
+        const { doctorName, email, contact, password, creationfor, docId, hosId } = req.body
         const superAdmin = req.user
+
+        console.log(req.body);
+        
 
         const checkAdmin = await UserModel.findOne({ email: email, isDeleted: false, role: 'admin' })
         if (checkAdmin) return res.status(400).json({ message: 'email already exist' })
@@ -631,7 +638,7 @@ export const addPersonalAssitant = async (req, res) => {
         const newPa = await UserModel.create({
             adminId: superAdmin?.id,
             role: 'personalAssitant',
-            name: name,
+            name: doctorName,
             contact: contact,
             creationfor: creationfor,
             email: email,
