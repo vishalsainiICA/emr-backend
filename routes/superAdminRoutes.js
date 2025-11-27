@@ -7,7 +7,8 @@ import {
     hosptialMetrices,
     hosptialPatients,
     signupSuperAdmin,
-    updateAdmin
+    updateAdmin,
+    updateStatus
 } from "../controllers/superAdminServices.js";
 import { verifyToken } from "../utills/jwtToken.js";
 import { addPersonalAssitant } from "../controllers/commonServices.js";
@@ -21,6 +22,7 @@ app.get('/hospital/getAllHospital', getAllHospital);
 app.get('/hospital/hosptial-metrices', hosptialMetrices);
 app.post('/admin/add-admin', addAdmin)
 app.put('/admin/update-admin', verifyToken, updateAdmin)
+app.put('/admin/update-status', verifyToken, updateStatus)
 app.get('/admin/all-admins', getAllAdmins)
 app.delete('/admin/delete-admin', deleteAdmin)
 app.delete('/hospital/delete-pa', deletePa)

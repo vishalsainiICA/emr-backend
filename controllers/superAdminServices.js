@@ -107,9 +107,13 @@ export const getProfile = async (req, res) => {
     }
 }
 export const addAdmin = async (req, res) => {
+    console.log(req.body);
     try {
-        const { name, email, contact, password, creationfor } = req.body
+        const { name, email, contact, password, creationfor, experience } = req.body
         const superAdmin = req.user
+
+
+
 
         const checkAdmin = await UserModel.findOne({ email: email, isDeleted: false, role: 'admin' })
         if (checkAdmin) return res.status(400).json({ message: 'email already exist' })
@@ -123,7 +127,8 @@ export const addAdmin = async (req, res) => {
             contact: contact,
             creationfor: creationfor,
             email: email,
-            password: password
+            password: password,
+            experience: experience
         })
         await AuthUserModel.create({
             contact: contact,
@@ -177,6 +182,40 @@ export const updateAdmin = async (req, res) => {
                 user: userAdmin
             }
         });
+    } catch (error) {
+        console.error("Update admin Error:", error);
+        return res.status(500).json({ message: "Internal Server Error" });
+    }
+};
+
+export const updateStatus = async (req, res) => {
+    try {
+        const id = req.query.id;
+        let status = req.query.status;
+
+        if (!id) {
+            return res.status(400).json({ message: "admin id is required" });
+        }
+
+        // Convert status string -> boolean
+        status = status === "true" ? true : false;
+
+        // Find & update
+        const userAdmin = await UserModel.findOneAndUpdate(
+            { _id: id },
+            { $set: { status: !status } },   // toggle
+            { new: true }                    // return updated data
+        );
+
+        if (!userAdmin) {
+            return res.status(404).json({ message: "Admin not found" });
+        }
+
+        return res.status(200).json({
+            message: "Admin updated successfully",
+            data: userAdmin
+        });
+
     } catch (error) {
         console.error("Update admin Error:", error);
         return res.status(500).json({ message: "Internal Server Error" });

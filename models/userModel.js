@@ -1,5 +1,6 @@
 
 import mongoose from "mongoose";
+import { boolean } from "webidl-conversions";
 
 const UserShcema = new mongoose.Schema({
     name: { type: String, default: null },
@@ -21,6 +22,7 @@ const UserShcema = new mongoose.Schema({
     totalLabTests: { type: Number, default: 0 },
     creationFor: { type: String, default: '' },
     role: { type: String, default: '' },
+    status: { type: Boolean, default: false },
     image: { type: String, default: '' },
     isDeleted: {
         type: Boolean,

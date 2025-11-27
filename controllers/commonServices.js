@@ -502,7 +502,7 @@ export const updateSingleDoctor = async (req, res) => {
 
 
 export const registerPatient = async (req, res) => {
-    console.log(req.body);
+   
 
     try {
 
