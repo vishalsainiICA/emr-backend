@@ -1,19 +1,738 @@
 [
   {
-    "patientId": "671d34a9e7a1b3a92f6b6b2c",
-    "uid": "PAT-2025-00123",
-    "height": 172,
-    "weight": 68,
-    "BP": 120,
-    "bloodGroup": "B+",
-    "o2": 98,
-    "heartRate": 76,
-    "sugar": 92,
-    "hemoglobin": 13.5,
-    "bodyTempreture": 37.2,
-    "respiratoryRate": 18,
-    "isDeleted": false,
-    "createdAt": "2025-10-27T10:45:12.301Z",
-    "updatedAt": "2025-10-27T10:45:12.301Z"
+    "illnessName": "Fever",
+    "symptoms": [
+      "High temperature",
+      "Chills",
+      "Body ache"
+    ]
+  },
+  {
+    "illnessName": "Common Cold",
+    "symptoms": [
+      "Sneezing",
+      "Runny nose",
+      "Cough"
+    ]
+  },
+  {
+    "illnessName": "Influenza",
+    "symptoms": [
+      "Fever",
+      "Fatigue",
+      "Sore throat"
+    ]
+  },
+  {
+    "illnessName": "COVID-19",
+    "symptoms": [
+      "Cough",
+      "Fever",
+      "Loss of smell"
+    ]
+  },
+  {
+    "illnessName": "Asthma",
+    "symptoms": [
+      "Wheezing",
+      "Short breath",
+      "Chest tightness"
+    ]
+  },
+  {
+    "illnessName": "Bronchitis",
+    "symptoms": [
+      "Cough",
+      "Chest pain",
+      "Fatigue"
+    ]
+  },
+  {
+    "illnessName": "Pneumonia",
+    "symptoms": [
+      "Cough",
+      "Breathing difficulty",
+      "Fever"
+    ]
+  },
+  {
+    "illnessName": "Tuberculosis",
+    "symptoms": [
+      "Weight loss",
+      "Night sweats",
+      "Cough"
+    ]
+  },
+  {
+    "illnessName": "Malaria",
+    "symptoms": [
+      "Shivering",
+      "Fever",
+      "Sweating"
+    ]
+  },
+  {
+    "illnessName": "Dengue",
+    "symptoms": [
+      "Joint pain",
+      "Fever",
+      "Rashes"
+    ]
+  },
+  {
+    "illnessName": "Typhoid",
+    "symptoms": [
+      "Fever",
+      "Headache",
+      "Weakness"
+    ]
+  },
+  {
+    "illnessName": "Chikungunya",
+    "symptoms": [
+      "Severe joint pain",
+      "Fever",
+      "Rash"
+    ]
+  },
+  {
+    "illnessName": "Hepatitis A",
+    "symptoms": [
+      "Jaundice",
+      "Fatigue",
+      "Vomiting"
+    ]
+  },
+  {
+    "illnessName": "Hepatitis B",
+    "symptoms": [
+      "Dark urine",
+      "Jaundice",
+      "Abdominal pain"
+    ]
+  },
+  {
+    "illnessName": "Hepatitis C",
+    "symptoms": [
+      "Fatigue",
+      "Nausea",
+      "Jaundice"
+    ]
+  },
+  {
+    "illnessName": "Gastritis",
+    "symptoms": [
+      "Stomach pain",
+      "Nausea",
+      "Bloating"
+    ]
+  },
+  {
+    "illnessName": "Acid Reflux",
+    "symptoms": [
+      "Heartburn",
+      "Chest discomfort",
+      "Regurgitation"
+    ]
+  },
+  {
+    "illnessName": "Ulcer",
+    "symptoms": [
+      "Burning stomach",
+      "Nausea",
+      "Indigestion"
+    ]
+  },
+  {
+    "illnessName": "Diabetes",
+    "symptoms": [
+      "Frequent urination",
+      "Thirst",
+      "Blurred vision"
+    ]
+  },
+  {
+    "illnessName": "Hypertension",
+    "symptoms": [
+      "Headache",
+      "Dizziness",
+      "Chest pain"
+    ]
+  },
+  {
+    "illnessName": "Hypotension",
+    "symptoms": [
+      "Fatigue",
+      "Blurred vision",
+      "Weakness"
+    ]
+  },
+  {
+    "illnessName": "Heart Attack",
+    "symptoms": [
+      "Chest pain",
+      "Short breath",
+      "Sweating"
+    ]
+  },
+  {
+    "illnessName": "Stroke",
+    "symptoms": [
+      "Face drooping",
+      "Weakness",
+      "Confusion"
+    ]
+  },
+  {
+    "illnessName": "Arrhythmia",
+    "symptoms": [
+      "Fast heartbeat",
+      "Dizziness",
+      "Chest fluttering"
+    ]
+  },
+  {
+    "illnessName": "Anemia",
+    "symptoms": [
+      "Fatigue",
+      "Pale skin",
+      "Short breath"
+    ]
+  },
+  {
+    "illnessName": "Thyroid Disorder",
+    "symptoms": [
+      "Weight change",
+      "Fatigue",
+      "Hair loss"
+    ]
+  },
+  {
+    "illnessName": "Hyperthyroidism",
+    "symptoms": [
+      "Weight loss",
+      "Tremors",
+      "Anxiety"
+    ]
+  },
+  {
+    "illnessName": "Hypothyroidism",
+    "symptoms": [
+      "Weight gain",
+      "Fatigue",
+      "Cold intolerance"
+    ]
+  },
+  {
+    "illnessName": "Arthritis",
+    "symptoms": [
+      "Joint pain",
+      "Stiffness",
+      "Swelling"
+    ]
+  },
+  {
+    "illnessName": "Osteoporosis",
+    "symptoms": [
+      "Weak bones",
+      "Back pain",
+      "Fractures"
+    ]
+  },
+  {
+    "illnessName": "Back Pain",
+    "symptoms": [
+      "Stiffness",
+      "Muscle ache",
+      "Limited motion"
+    ]
+  },
+  {
+    "illnessName": "Sciatica",
+    "symptoms": [
+      "Leg pain",
+      "Numbness",
+      "Hip pain"
+    ]
+  },
+  {
+    "illnessName": "Migraine",
+    "symptoms": [
+      "Headache",
+      "Nausea",
+      "Light sensitivity"
+    ]
+  },
+  {
+    "illnessName": "Cluster Headache",
+    "symptoms": [
+      "Severe pain",
+      "Red eyes",
+      "Tearing"
+    ]
+  },
+  {
+    "illnessName": "Sinusitis",
+    "symptoms": [
+      "Blocked nose",
+      "Headache",
+      "Facial pain"
+    ]
+  },
+  {
+    "illnessName": "Ear Infection",
+    "symptoms": [
+      "Ear pain",
+      "Fever",
+      "Hearing loss"
+    ]
+  },
+  {
+    "illnessName": "Eye Infection",
+    "symptoms": [
+      "Redness",
+      "Itching",
+      "Watering"
+    ]
+  },
+  {
+    "illnessName": "Conjunctivitis",
+    "symptoms": [
+      "Red eyes",
+      "Itching",
+      "Discharge"
+    ]
+  },
+  {
+    "illnessName": "Skin Allergy",
+    "symptoms": [
+      "Itching",
+      "Rashes",
+      "Redness"
+    ]
+  },
+  {
+    "illnessName": "Eczema",
+    "symptoms": [
+      "Dry skin",
+      "Rash",
+      "Itching"
+    ]
+  },
+  {
+    "illnessName": "Psoriasis",
+    "symptoms": [
+      "Red patches",
+      "Scaling",
+      "Itching"
+    ]
+  },
+  {
+    "illnessName": "Dermatitis",
+    "symptoms": [
+      "Inflammation",
+      "Rash",
+      "Itching"
+    ]
+  },
+  {
+    "illnessName": "Food Poisoning",
+    "symptoms": [
+      "Vomiting",
+      "Diarrhea",
+      "Cramps"
+    ]
+  },
+  {
+    "illnessName": "Irritable Bowel Syndrome",
+    "symptoms": [
+      "Cramps",
+      "Bloating",
+      "Diarrhea"
+    ]
+  },
+  {
+    "illnessName": "Constipation",
+    "symptoms": [
+      "Hard stool",
+      "Straining",
+      "Discomfort"
+    ]
+  },
+  {
+    "illnessName": "Diarrhea",
+    "symptoms": [
+      "Loose stools",
+      "Dehydration",
+      "Cramps"
+    ]
+  },
+  {
+    "illnessName": "Kidney Stone",
+    "symptoms": [
+      "Back pain",
+      "Blood urine",
+      "Nausea"
+    ]
+  },
+  {
+    "illnessName": "UTI",
+    "symptoms": [
+      "Burning urination",
+      "Frequent urge",
+      "Fever"
+    ]
+  },
+  {
+    "illnessName": "Liver Infection",
+    "symptoms": [
+      "Jaundice",
+      "Weakness",
+      "Abdominal pain"
+    ]
+  },
+  {
+    "illnessName": "Gallstones",
+    "symptoms": [
+      "Upper stomach pain",
+      "Nausea",
+      "Vomiting"
+    ]
+  },
+  {
+    "illnessName": "Pancreatitis",
+    "symptoms": [
+      "Upper pain",
+      "Vomiting",
+      "Fever"
+    ]
+  },
+  {
+    "illnessName": "Obesity",
+    "symptoms": [
+      "Weight gain",
+      "Fatigue",
+      "Joint pain"
+    ]
+  },
+  {
+    "illnessName": "Anxiety Disorder",
+    "symptoms": [
+      "Fear",
+      "Sweating",
+      "Trembling"
+    ]
+  },
+  {
+    "illnessName": "Depression",
+    "symptoms": [
+      "Sadness",
+      "Fatigue",
+      "Sleep issues"
+    ]
+  },
+  {
+    "illnessName": "Bipolar Disorder",
+    "symptoms": [
+      "Mood swings",
+      "Irritability",
+      "Energy changes"
+    ]
+  },
+  {
+    "illnessName": "Insomnia",
+    "symptoms": [
+      "Sleeplessness",
+      "Fatigue",
+      "Irritability"
+    ]
+  },
+  {
+    "illnessName": "Sleep Apnea",
+    "symptoms": [
+      "Snoring",
+      "Fatigue",
+      "Breathing stops"
+    ]
+  },
+  {
+    "illnessName": "Allergic Rhinitis",
+    "symptoms": [
+      "Sneezing",
+      "Runny nose",
+      "Itching"
+    ]
+  },
+  {
+    "illnessName": "Tonsillitis",
+    "symptoms": [
+      "Sore throat",
+      "Fever",
+      "Swollen tonsils"
+    ]
+  },
+  {
+    "illnessName": "Appendicitis",
+    "symptoms": [
+      "Right pain",
+      "Nausea",
+      "Fever"
+    ]
+  },
+  {
+    "illnessName": "Gout",
+    "symptoms": [
+      "Joint swelling",
+      "Severe pain",
+      "Redness"
+    ]
+  },
+  {
+    "illnessName": "Varicose Veins",
+    "symptoms": [
+      "Swollen veins",
+      "Pain",
+      "Heaviness"
+    ]
+  },
+  {
+    "illnessName": "Cholesterol",
+    "symptoms": [
+      "Chest pain",
+      "Fatigue",
+      "Numbness"
+    ]
+  },
+  {
+    "illnessName": "Bronchial Allergy",
+    "symptoms": [
+      "Cough",
+      "Short breath",
+      "Wheezing"
+    ]
+  },
+  {
+    "illnessName": "Whooping Cough",
+    "symptoms": [
+      "Severe cough",
+      "Vomiting",
+      "Fatigue"
+    ]
+  },
+  {
+    "illnessName": "Measles",
+    "symptoms": [
+      "Rash",
+      "Fever",
+      "Cough"
+    ]
+  },
+  {
+    "illnessName": "Chickenpox",
+    "symptoms": [
+      "Blisters",
+      "Itching",
+      "Fever"
+    ]
+  },
+  {
+    "illnessName": "Mumps",
+    "symptoms": [
+      "Swollen glands",
+      "Fever",
+      "Pain"
+    ]
+  },
+  {
+    "illnessName": "Rubella",
+    "symptoms": [
+      "Rash",
+      "Fever",
+      "Headache"
+    ]
+  },
+  {
+    "illnessName": "Polio",
+    "symptoms": [
+      "Weakness",
+      "Muscle pain",
+      "Fever"
+    ]
+  },
+  {
+    "illnessName": "Ringworm",
+    "symptoms": [
+      "Circular rash",
+      "Itching",
+      "Redness"
+    ]
+  },
+  {
+    "illnessName": "Fungal Infection",
+    "symptoms": [
+      "Red patches",
+      "Itching",
+      "Scaling"
+    ]
+  },
+  {
+    "illnessName": "Herpes",
+    "symptoms": [
+      "Blisters",
+      "Pain",
+      "Burning"
+    ]
+  },
+  {
+    "illnessName": "Shingles",
+    "symptoms": [
+      "Rash",
+      "Burning pain",
+      "Tingling"
+    ]
+  },
+  {
+    "illnessName": "Ear Wax Block",
+    "symptoms": [
+      "Hearing loss",
+      "Pain",
+      "Fullness"
+    ]
+  },
+  {
+    "illnessName": "Motion Sickness",
+    "symptoms": [
+      "Nausea",
+      "Vomiting",
+      "Dizziness"
+    ]
+  },
+  {
+    "illnessName": "Heat Stroke",
+    "symptoms": [
+      "High fever",
+      "Confusion",
+      "Dry skin"
+    ]
+  },
+  {
+    "illnessName": "Dehydration",
+    "symptoms": [
+      "Dry mouth",
+      "Fatigue",
+      "Dizziness"
+    ]
+  },
+  {
+    "illnessName": "Vitamin D Deficiency",
+    "symptoms": [
+      "Weakness",
+      "Bone pain",
+      "Fatigue"
+    ]
+  },
+  {
+    "illnessName": "Vitamin B12 Deficiency",
+    "symptoms": [
+      "Numbness",
+      "Fatigue",
+      "Weakness"
+    ]
+  },
+  {
+    "illnessName": "Anaphylaxis",
+    "symptoms": [
+      "Swelling",
+      "Breathing issue",
+      "Rash"
+    ]
+  },
+  {
+    "illnessName": "Metal Allergy",
+    "symptoms": [
+      "Rashes",
+      "Itching",
+      "Burning"
+    ]
+  },
+  {
+    "illnessName": "Drug Allergy",
+    "symptoms": [
+      "Hives",
+      "Swelling",
+      "Rash"
+    ]
+  },
+  {
+    "illnessName": "Smoke Allergy",
+    "symptoms": [
+      "Cough",
+      "Sneezing",
+      "Irritation"
+    ]
+  },
+  {
+    "illnessName": "Sinus Allergy",
+    "symptoms": [
+      "Headache",
+      "Blocked nose",
+      "Sneezing"
+    ]
+  },
+  {
+    "illnessName": "Acne",
+    "symptoms": [
+      "Pimples",
+      "Redness",
+      "Inflammation"
+    ]
+  },
+  {
+    "illnessName": "Hair Fall",
+    "symptoms": [
+      "Hair thinning",
+      "Breakage",
+      "Scalp itching"
+    ]
+  },
+  {
+    "illnessName": "Oral Infection",
+    "symptoms": [
+      "Pain",
+      "Bad breath",
+      "Swelling"
+    ]
+  },
+  {
+    "illnessName": "Tooth Decay",
+    "symptoms": [
+      "Pain",
+      "Sensitivity",
+      "Cavity"
+    ]
+  },
+  {
+    "illnessName": "Gingivitis",
+    "symptoms": [
+      "Bleeding gums",
+      "Bad breath",
+      "Swelling"
+    ]
+  },
+  {
+    "illnessName": "Jaw Pain",
+    "symptoms": [
+      "Stiffness",
+      "Pain",
+      "Difficulty chewing"
+    ]
+  },
+  {
+    "illnessName": "Hypoglycemia",
+    "symptoms": [
+      "Sweating",
+      "Shaking",
+      "Dizziness"
+    ]
   }
 ]

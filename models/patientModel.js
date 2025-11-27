@@ -92,6 +92,12 @@ const patientSchema = new mongoose.Schema(
         attendeeRelation: {
             type: String,
         },
+        city: {
+            type: String,
+        },
+        state: {
+            type: String,
+        },
         age: {
             type: Number,
         },

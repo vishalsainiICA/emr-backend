@@ -55,7 +55,6 @@ export const login = async (req, res) => {
         if (!email || !password) return res.status(400).json({ message: 'Invalid credentials' })
         const user = await AuthUserModel.findOne({ email }).populate('refId');;
         if (!user) return res.status(400).json({ message: 'Email Not Found' })
-        console.log(user);
 
         const isMatch = String(user?.refId?.password) === String(password)
         // console.log(isMatch);

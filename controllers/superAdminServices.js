@@ -296,7 +296,16 @@ export const hosptialMetrices = async (req, res) => {
 export const allPatients = async (req, res) => {
     try {
         const patients = await PatientModel.find({ isDeleted: false }).populate('hospitalId doctorId prescribtionId initialAssementId')
+        const [TotalPatient, TotalRevenue, TopPerformanceHospital, TotalPrescbrition] = await Promise.all([
+            PatientModel.countDocuments({ isDeleted: false }),
 
+            HospitalModel.aggregate([
+                { $match: { isDeleted: false } },
+            ]),
+            HospitalModel.find({ isDeleted: false }).sort({ totalRevenue: -1 }).limit(10).populate("medicalDirector"),
+            PrescribtionModel.countDocuments({ isDeleted: false }),
+
+        ])
         return res.status(200).json({
             message: "success",
             status: 200,

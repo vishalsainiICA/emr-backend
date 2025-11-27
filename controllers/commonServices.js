@@ -503,6 +503,7 @@ export const updateSingleDoctor = async (req, res) => {
 
 export const registerPatient = async (req, res) => {
     console.log(req.body);
+
     try {
 
         const { phone, hospitalId } = req.body
@@ -573,6 +574,8 @@ export const registerPatient = async (req, res) => {
             attendeePhone: req.body?.attendeePhone,
             attendeeRelation: req.body?.attendeeRelation,
             specialty: req.body?.specialty,
+            city: req.body?.city,
+            state: req.body?.state,
             addharDocumnets: {
                 addharfrontPath,
                 addharbackPath
@@ -628,7 +631,7 @@ export const addPersonalAssitant = async (req, res) => {
         const superAdmin = req.user
 
         console.log(req.body);
-        
+
 
         const checkAdmin = await UserModel.findOne({ email: email, isDeleted: false, role: 'admin' })
         if (checkAdmin) return res.status(400).json({ message: 'email already exist' })
