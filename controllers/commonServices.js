@@ -502,7 +502,7 @@ export const updateSingleDoctor = async (req, res) => {
 
 
 export const registerPatient = async (req, res) => {
-   
+    // console.log(req.body);
 
     try {
 
@@ -516,7 +516,7 @@ export const registerPatient = async (req, res) => {
         }
 
         const [totalDocument, existPhone] = await Promise.all([
-            PatientModel.countDocuments({ hospitalId: "690eeab9521e26ba703e4962" }),
+            PatientModel.countDocuments({ hospitalId: hospitalId }),
             PatientModel.findOne({ phone: phone })
         ]);
 
@@ -531,9 +531,9 @@ export const registerPatient = async (req, res) => {
         const patientUid = `${req.body.name.trim().slice(0, 4).toUpperCase()}${totalDocument}`.trim();
         const categories = req.body.categories;
         const counts = req.body.fileCount;
-        const files = req.files.documents;
-        const addharfrontPath = req.files.addharfront[0].path.replace(/\\/g, "/")
-        const addharbackPath = req.files.addharback[0].path.replace(/\\/g, "/")
+        const files = req.files?.documents;
+        const addharfrontPath = req.files?.addharfront[0].path.replace(/\\/g, "/")
+        const addharbackPath = req.files?.addharback[0].path.replace(/\\/g, "/")
 
         let finalData = []
         let index = 0;
@@ -576,6 +576,8 @@ export const registerPatient = async (req, res) => {
             specialty: req.body?.specialty,
             city: req.body?.city,
             state: req.body?.state,
+            registerarId: req.body?.registerarId,
+
             addharDocumnets: {
                 addharfrontPath,
                 addharbackPath
@@ -685,3 +687,52 @@ export const addPersonalAssitant = async (req, res) => {
 
     }
 }
+
+
+export const changePatientStatus = async (req, res) => {
+    try {
+        console.log(req.body);
+
+        const { id, newDate, cancelReason } = req.body;
+
+        if (!id) {
+            return res.status(400).json({ message: "id is required" });
+        }
+
+        let updateFields = {};
+
+        //  If user is postponing appointment (date change)
+        if (newDate) {
+            updateFields.updatedAt = new Date(newDate);  // Always convert to JS Date
+            updateFields.status = "Postponed";           // optional
+        }
+
+        // If user is cancelling appointment
+        if (cancelReason) {
+            updateFields.status = "Cancel";             // update status
+            updateFields.cancelReason = cancelReason;   // save reason
+        }
+
+        const updatedPatient = await PatientModel.findByIdAndUpdate(
+            id,
+            { $set: updateFields },
+            { new: true, timestamps: false }
+        );
+
+        console.log(updatedPatient);
+
+        if (!updatedPatient) {
+            return res.status(404).json({ message: "Patient not found" });
+        }
+
+        return res.status(200).json({
+            message: "success",
+            data: updatedPatient
+        });
+
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ message: "Internal Server Error" });
+    }
+};
+

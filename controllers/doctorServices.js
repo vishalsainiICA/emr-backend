@@ -32,7 +32,7 @@ export const todayPatient = async (req, res) => {
         const [doctorProfile, todayPatient] = await Promise.all([
             UserModel.findById(doctorId).populate('hospitalId'),
             PatientModel.find({
-                createdAt: { $gte: startOfDay, $lte: endOfDay },
+                updatedAt: { $gte: startOfDay, $lte: endOfDay },
                 initialAssementId: { $ne: null }
 
             }).populate('initialAssementId'),
@@ -65,49 +65,116 @@ export const getAllIllness = async (req, res) => {
 
 export const getAllPatientRecords = async (req, res) => {
     try {
-        const user = req.user;
-        // today range
-        const startOfDay = new Date();
-        startOfDay.setHours(0, 0, 0, 0);
 
-        const endOfDay = new Date();
-        endOfDay.setHours(23, 59, 59, 999);
+        const user = req.user;
+        const date = req.query?.date;
+        const status = req.query?.status;
+
+        let query = {
+            doctorId: user?.id
+        };
+
+        console.log(req.query);
+
+        // 🔹 1) If DATE given → always apply DATE filter
+        if (date) {
+            const selected = new Date(date);
+
+            const start = new Date(selected);
+            start.setHours(0, 0, 0, 0);
+
+            const end = new Date(selected);
+            end.setHours(23, 59, 59, 999);
+
+            query.updatedAt = { $gte: start, $lte: end };
+
+            // date wale filter me initial assessment required
+            query.initialAssementId = { $ne: null };
+        }
+
+        // 🔹 2) STATUS = TODAY
+        else if (status === "today") {
+
+            const start = new Date();
+            start.setHours(0, 0, 0, 0);
+
+            const end = new Date();
+            end.setHours(23, 59, 59, 999);
+
+            query.updatedAt = { $gte: start, $lte: end };
+            query.initialAssementId = { $ne: null };
+        }
+
+        // 🔹 3) STATUS = POSTPONED
+        else if (status === "postponed") {
+            query.status = "Postponed";
+        }
+
+        // 🔹 4) STATUS = CANCEL
+        else if (status === "cancel") {
+            query.status = "Cancel";
+        }
+
+        // 🔹 5) STATUS = ALL → no extra filter
+        else if (status === "all") { }
+
+        // 🔹 6) DEFAULT → TODAY
+        else {
+            const start = new Date();
+            start.setHours(0, 0, 0, 0);
+
+            const end = new Date();
+            end.setHours(23, 59, 59, 999);
+
+            query.updatedAt = { $gte: start, $lte: end };
+            query.initialAssementId = { $ne: null };
+        }
 
         const [
             TodayPatient,
-            TotalPatient,
+            TotalMalepatient,
+            TotalFemalepatient,
             TotalPrescrition,
             CancelPatient
         ] = await Promise.all([
-            // Today Patients
-            PatientModel.find({
+
+            PatientModel.find(query)
+                .sort({ updatedAt: -1 })
+                .populate("initialAssementId"),
+
+            PatientModel.countDocuments({
+                isDeleted: false,
                 doctorId: user?.id,
-                createdAt: { $gte: startOfDay, $lte: endOfDay },
-                initialAssementId: { $ne: null }
+                gender: { $regex: "^male$", $options: "i" }
+            }),
+
+            PatientModel.countDocuments({
+                isDeleted: false,
+
+                doctorId: user?.id,
+                gender: { $regex: "^female$", $options: "i" }
+            }),
+
+            PatientModel.countDocuments({
+                doctorId: user?.id,
+                prescribtionId: { $ne: null }
+            }),
+
+            PatientModel.countDocuments({
+                doctorId: user?.id,
+                status: "Cancel"
             })
-                .sort({ createdAt: -1 }) // latest first
-                .populate('initialAssementId'),
-
-            // Total Patients
-            PatientModel.countDocuments({ doctorId: user?.id }),
-
-            // Total Prescriptions
-            PatientModel.countDocuments({ doctorId: user?.id, prescribtionId: { $ne: null } }),
-
-            // Cancelled Patients
-            PatientModel.countDocuments({ doctorId: user?.id, status: "Cancel" })
         ]);
-
 
         res.status(200).json({
             message: "success",
             data: TodayPatient,
             metrices: {
                 TodayPatient: TodayPatient?.length,
-                TotalPatient,
+                TotalMalepatient,
+                TotalFemalepatient,
                 TotalPrescrition,
                 CancelPatient,
-
             }
         });
 
@@ -160,46 +227,68 @@ export const savePrescribtion = async (req, res) => {
     }
 }
 
-export const changePatientStatus = async (req, res) => {
+
+export const dailyActivity = async (req, res) => {
     try {
-        const { id, newDate, cancelReason } = req.body;
+        const user = req.user;
+        // today range
+        const startOfDay = new Date();
+        startOfDay.setHours(0, 0, 0, 0);
 
-        if (!id) {
-            return res.status(400).json({ message: "id is required" });
-        }
+        const endOfDay = new Date();
+        endOfDay.setHours(23, 59, 59, 999);
 
-        let updateFields = {};
+        const [
+            UserRegister,
+            TodayPriscribtion,
+            PostponedPatient,
+            CancelPatient
+        ] = await Promise.all([
+            // Today Patients
+            PatientModel.find({
+                doctorId: user?.id,
+                updatedAt: { $gte: startOfDay, $lte: endOfDay },
+            })
+                .sort({ updatedAt: -1 }), // latest first
 
-        //  If user is postponing appointment (date change)
-        if (newDate) {
-            updateFields.createdAt = new Date(newDate);  // Always convert to JS Date
-            updateFields.status = "Postponed";           // optional
-        }
+            PatientModel.find({
+                doctorId: user?.id,
+                updatedAt: { $gte: startOfDay, $lte: endOfDay },
+                prescribtionId: { $ne: null }
+            })
+                .sort({ updatedAt: -1 }),// latest first
 
-        // If user is cancelling appointment
-        if (cancelReason) {
-            updateFields.status = "Cancel";             // update status
-            updateFields.cancelReason = cancelReason;   // save reason
-        }
+            PatientModel.find({
+                doctorId: user?.id,
+                updatedAt: { $gte: startOfDay, $lte: endOfDay },
+                status: "Postponed"
+            })
+                .sort({ updatedAt: -1 }),// latest first
+            PatientModel.find({
+                doctorId: user?.id,
+                updatedAt: { $gte: startOfDay, $lte: endOfDay },
+                status: "Cancel"
+            })
+                .sort({ updatedAt: -1 }) // latest first
+        ]);
 
-        const updatedPatient = await PatientModel.findByIdAndUpdate(
-            id,
-            { $set: updateFields },
-            { new: true }
-        );
+        let merged = [
+            ...UserRegister,
+            ...TodayPriscribtion,
+            ...PostponedPatient,
+            ...CancelPatient
+        ];
 
-        if (!updatedPatient) {
-            return res.status(404).json({ message: "Patient not found" });
-        }
+        // SORT by time (latest first)
+        merged.sort((a, b) => new Date(b.time) - new Date(a.time));
 
-        return res.status(200).json({
+
+        res.status(200).json({
             message: "success",
-            data: updatedPatient
+            data: merged
         });
-
     } catch (error) {
         console.error(error);
         res.status(500).json({ message: "Internal Server Error" });
     }
-};
-
+}

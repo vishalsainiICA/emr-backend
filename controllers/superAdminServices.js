@@ -302,9 +302,18 @@ export const getAllHospital = async (req, res) => {
 
 export const hosptialMetrices = async (req, res) => {
     try {
-        const [TotalHospital, TotalPatient, TotalRevenue, TopPerformanceHospital, TotalPrescbrition] = await Promise.all([
+
+        const [TotalHospital, TotalMalepatient, TotalFemalepatient, TotalRevenue, TopPerformanceHospital, TotalPrescbrition] = await Promise.all([
             HospitalModel.countDocuments({ isDeleted: false }),
-            PatientModel.countDocuments({ isDeleted: false }),
+            PatientModel.countDocuments({
+                isDeleted: false,
+                gender: { $regex: "^male$", $options: "i" }
+            }),
+
+            PatientModel.countDocuments({
+                isDeleted: false,
+                gender: { $regex: "^female$", $options: "i" }
+            }),
 
             HospitalModel.aggregate([
                 { $match: { isDeleted: false } },
@@ -317,7 +326,8 @@ export const hosptialMetrices = async (req, res) => {
             message: 'success', data: {
                 "metrices": [
                     { key: "Total Hospital", value: TotalHospital },
-                    { key: "Total Patient", value: TotalPatient },
+                    { key: "Total MalePatient", value: TotalMalepatient },
+                    { key: "Total FemalePatient", value: TotalFemalepatient },
                     { key: "Total Prescbrition", value: TotalPrescbrition },
                     { key: "Total Revenue", value: TotalRevenue[0]?.totalRevenue }
                 ],
@@ -334,17 +344,8 @@ export const hosptialMetrices = async (req, res) => {
 
 export const allPatients = async (req, res) => {
     try {
-        const patients = await PatientModel.find({ isDeleted: false }).populate('hospitalId doctorId prescribtionId initialAssementId')
-        const [TotalPatient, TotalRevenue, TopPerformanceHospital, TotalPrescbrition] = await Promise.all([
-            PatientModel.countDocuments({ isDeleted: false }),
+        const patients = await PatientModel.find({ isDeleted: false , }).populate('hospitalId doctorId prescribtionId initialAssementId')
 
-            HospitalModel.aggregate([
-                { $match: { isDeleted: false } },
-            ]),
-            HospitalModel.find({ isDeleted: false }).sort({ totalRevenue: -1 }).limit(10).populate("medicalDirector"),
-            PrescribtionModel.countDocuments({ isDeleted: false }),
-
-        ])
         return res.status(200).json({
             message: "success",
             status: 200,
@@ -365,7 +366,7 @@ export const hosptialPatients = async (req, res) => {
         }
         // console.log(id);
 
-        const patients = await PatientModel.find({ isDeleted: false, hospitalId: id }).populate('hospitalId doctorId prescribtionId initialAssementId')
+        const patients = await PatientModel.find({ isDeleted: false, hospitalId: id, prescribtionId: { $ne: null } }).populate('hospitalId doctorId prescribtionId initialAssementId')
 
         return res.status(200).json({
             message: "success",
