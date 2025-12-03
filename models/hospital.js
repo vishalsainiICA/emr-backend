@@ -8,9 +8,9 @@ const hospitalSchema = new mongoose.Schema(
             default: null
             //   required: true,
         },
-        totalRevenue: { type: String, default: 0 },
-        totalPrescribtion: { type: String, default: 0 },
-        totalPatient: { type: String, default: 0 },
+        totalRevenue: { type: Number, default: 0 },
+        totalPrescribtion: { type: Number, default: 0 },
+        totalPatient: { type: Number, default: 0 },
         name: { type: String, required: true },
         state: { type: String, default: null },
         city: { type: String, default: null },

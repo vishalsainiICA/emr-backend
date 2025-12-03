@@ -344,7 +344,60 @@ export const hosptialMetrices = async (req, res) => {
 
 export const allPatients = async (req, res) => {
     try {
-        const patients = await PatientModel.find({ isDeleted: false , }).populate('hospitalId doctorId prescribtionId initialAssementId')
+
+        const date = req.query?.date;
+        const status = req.query?.status;
+
+        let query = {
+            isDeleted: false,
+        };
+
+        // 🔹 1) If DATE given → always apply DATE filter
+        if (date) {
+            const selected = new Date(date);
+
+            const start = new Date(selected);
+            start.setHours(0, 0, 0, 0);
+
+            const end = new Date(selected);
+            end.setHours(23, 59, 59, 999);
+
+            query.updatedAt = { $gte: start, $lte: end };
+
+            // date wale filter me initial assessment required
+            query.initialAssementId = { $ne: null };
+        }
+
+        // 🔹 2) STATUS = TODAY
+        else if (status === "today") {
+
+            const start = new Date();
+            start.setHours(0, 0, 0, 0);
+
+            const end = new Date();
+            end.setHours(23, 59, 59, 999);
+
+            query.updatedAt = { $gte: start, $lte: end };
+            query.initialAssementId = { $ne: null };
+        }
+
+        // 🔹 3) STATUS = POSTPONED
+        else if (status === "postponed") {
+            query.status = "Postponed";
+        }
+
+        // 🔹 4) STATUS = CANCEL
+        else if (status === "cancel") {
+            query.status = "Cancel";
+        }
+
+        // 🔹 5) STATUS = ALL → no extra filter
+        else if (status === "all") { }
+
+        // 🔹 6) DEFAULT → TODAY
+
+
+        const patients = await PatientModel.find(query).populate('hospitalId doctorId prescribtionId initialAssementId')
 
         return res.status(200).json({
             message: "success",

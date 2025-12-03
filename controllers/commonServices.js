@@ -279,28 +279,8 @@ export const findHospitalById = async (req, res) => {
             },
         }).populate('medicalDirector')
 
-
-        const [
-            TotalPatient,
-            TotalPrescrition,
-            TotalRevenue
-        ] = await Promise.all([
-
-            // Total Patients
-            PatientModel.countDocuments({ hospitalId: id }),
-            // Total Prescriptions
-            PatientModel.countDocuments({ hospitalId: id, prescribtionId: { $ne: null } }),
-            HospitalModel.aggregate([
-                { $match: { isDeleted: false } },
-            ]),
-        ]);
-
         return res.status(200).json({
-            message: 'success', data: hosptial, metrices: {
-                TotalPatient,
-                TotalPrescrition,
-                TotalRevenue,
-            }
+            message: 'success', data: hosptial
         })
 
     } catch (error) {
@@ -589,11 +569,30 @@ export const registerPatient = async (req, res) => {
         };
         const newPatient = new PatientModel(object);
         await newPatient.save();
-        return res.status(200).json({
-            success: true,
-            message: "User Registered Successfully",
-            data: newPatient
-        });
+
+        const result = HospitalModel.findByIdAndUpdate(hospitalId, {
+            $inc: {
+                totalPatient: 1
+            }
+        }, {
+            new: true
+        })
+        if (result) {
+            return res.status(200).json({
+                success: true,
+                message: "User Registered Successfully",
+                data: newPatient
+            });
+        }
+
+        else {
+            return res.status(300).json({
+                success: true,
+                message: "Patient Registered Successfully But Not Updated in Hospital in Document",
+                data: newPatient
+            });
+        }
+
     } catch (error) {
         console.error("Error while Registering Patient:", error);
         return res.status(500).json({
@@ -622,8 +621,6 @@ export const patientsByHospitalById = async (req, res) => {
 
     }
 }
-
-
 
 export const addPersonalAssitant = async (req, res) => {
     try {
@@ -687,7 +684,6 @@ export const addPersonalAssitant = async (req, res) => {
 
     }
 }
-
 
 export const changePatientStatus = async (req, res) => {
     try {

@@ -5,6 +5,8 @@ import InitialAssesment from "../models/initialAssessmentModel.js";
 import PatientModel from "../models/patientModel.js";
 import PrescribtionModel from "../models/prescribtionModel.js";
 import UserModel from "../models/userModel.js";
+import HospitalModel from "../models/hospital.js";
+import { updateAdmin } from "./superAdminServices.js";
 
 
 export const getProfile = async (req, res) => {
@@ -74,7 +76,11 @@ export const getAllPatientRecords = async (req, res) => {
             doctorId: user?.id
         };
 
-        console.log(req.query);
+        const start = new Date();
+        start.setHours(0, 0, 0, 0);
+
+        const end = new Date();
+        end.setHours(23, 59, 59, 999);
 
         // 🔹 1) If DATE given → always apply DATE filter
         if (date) {
@@ -94,12 +100,6 @@ export const getAllPatientRecords = async (req, res) => {
 
         // 🔹 2) STATUS = TODAY
         else if (status === "today") {
-
-            const start = new Date();
-            start.setHours(0, 0, 0, 0);
-
-            const end = new Date();
-            end.setHours(23, 59, 59, 999);
 
             query.updatedAt = { $gte: start, $lte: end };
             query.initialAssementId = { $ne: null };
@@ -132,6 +132,7 @@ export const getAllPatientRecords = async (req, res) => {
 
         const [
             TodayPatient,
+            TodayPatients,
             TotalMalepatient,
             TotalFemalepatient,
             TotalPrescrition,
@@ -142,6 +143,10 @@ export const getAllPatientRecords = async (req, res) => {
                 .sort({ updatedAt: -1 })
                 .populate("initialAssementId"),
 
+            PatientModel.countDocuments({
+                updatedAt: { $gte: start, $lte: end },
+                initialAssementId :{ $ne: null }
+            }),
             PatientModel.countDocuments({
                 isDeleted: false,
                 doctorId: user?.id,
@@ -170,7 +175,7 @@ export const getAllPatientRecords = async (req, res) => {
             message: "success",
             data: TodayPatient,
             metrices: {
-                TodayPatient: TodayPatient?.length,
+                TodayPatient: TodayPatients,
                 TotalMalepatient,
                 TotalFemalepatient,
                 TotalPrescrition,
@@ -186,6 +191,12 @@ export const getAllPatientRecords = async (req, res) => {
 
 export const savePrescribtion = async (req, res) => {
     try {
+
+        const { hospitalId } = req.body
+
+        if (!hospitalId) return res.status(400).json({
+            message: 'hospital id is not found'
+        })
         const obj =
         {
             "patientId": req.body.patientId,
@@ -210,6 +221,14 @@ export const savePrescribtion = async (req, res) => {
             new: true
         })
 
+        await HospitalModel.findByIdAndUpdate(hospitalId, {
+            $inc: {
+                totalPrescribtion: 1
+            }
+        }, {
+            new: true
+        })
+
         if (result) {
             return res.status(200).json({
                 message: 'success', data: result
@@ -226,7 +245,6 @@ export const savePrescribtion = async (req, res) => {
         res.status(500).json({ message: "Internal Server Error" });
     }
 }
-
 
 export const dailyActivity = async (req, res) => {
     try {

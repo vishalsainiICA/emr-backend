@@ -1,5 +1,5 @@
 import express from "express";
-import { getAllPatientRecords, getProfile, registerPatient, saveInitialAssessments } from "../controllers/assitantServices.js";
+import { dailyActivity, getAllPatientRecords, getProfile, registerPatient, saveInitialAssessments } from "../controllers/assitantServices.js";
 import { verifyToken } from "../utills/jwtToken.js";
 import upload from "../middlewares/multer.js";
 
@@ -14,5 +14,6 @@ app.post('/patient/register-patient', verifyToken, upload.fields([{ name: 'docum
 
 app.get('/auth/profile', verifyToken, getProfile)
 app.get('/all-patient-record', verifyToken, getAllPatientRecords)
+app.get("/daily-activity",verifyToken, dailyActivity)
 app.post('/intital-assement', saveInitialAssessments)
 export default app

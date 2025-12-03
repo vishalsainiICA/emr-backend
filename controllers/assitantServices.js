@@ -225,3 +225,73 @@ export const registerPatient = async (req, res) => {
     //     });
     // }
 };
+
+
+export const dailyActivity = async (req, res) => {
+    try {
+        const user = req.user;
+        // today rangeU
+        const profile =await  UserModel.findById(user.id)
+        console.log(profile);
+        
+        if (!profile) return res.status(400).json({ "message": "user not found" })
+        const startOfDay = new Date();
+        startOfDay.setHours(0, 0, 0, 0);
+
+        const endOfDay = new Date();
+        endOfDay.setHours(23, 59, 59, 999);
+
+        const [
+            UserRegister,
+            TodayPriscribtion,
+            PostponedPatient,
+            CancelPatient
+        ] = await Promise.all([
+            // Today Patients
+            PatientModel.find({
+                doctorId: profile?.doctorId,
+                updatedAt: { $gte: startOfDay, $lte: endOfDay },
+            })
+                .sort({ updatedAt: -1 }), // latest first
+
+            PatientModel.find({
+                doctorId: profile?.doctorId,
+                updatedAt: { $gte: startOfDay, $lte: endOfDay },
+                prescribtionId: { $ne: null }
+            })
+                .sort({ updatedAt: -1 }),// latest first
+
+            PatientModel.find({
+                doctorId: profile?.doctorId,
+                updatedAt: { $gte: startOfDay, $lte: endOfDay },
+                status: "Postponed"
+            })
+                .sort({ updatedAt: -1 }),// latest first
+            PatientModel.find({
+                doctorId: profile?.doctorId,
+                updatedAt: { $gte: startOfDay, $lte: endOfDay },
+                status: "Cancel"
+            })
+                .sort({ updatedAt: -1 }) // latest first
+        ]);
+
+        let merged = [
+            ...UserRegister,
+            ...TodayPriscribtion,
+            ...PostponedPatient,
+            ...CancelPatient
+        ];
+
+        // SORT by time (latest first)
+        merged.sort((a, b) => new Date(b.time) - new Date(a.time));
+
+
+        res.status(200).json({
+            message: "success",
+            data: merged
+        });
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ message: "Internal Server Error" });
+    }
+}
