@@ -24,21 +24,8 @@ export const addHospital = async (req, res) => {
 
         const admin = req.user;
 
-        console.log(admin);
-
-        console.log(req.body);
-
-
-
-        // Create Hospital
-        console.log(req.files);
-
         const directorPath = req.files?.medicalDirectorImage?.[0]?.path?.replace(/\\/g, "/") || null;
         const watermarkPath = req.files?.watermarkImg?.[0]?.path?.replace(/\\/g, "/") || null;
-
-        console.log("directorpath", directorPath);
-
-
         const newHospital = await HospitalModel.create({
             adminId: admin?.id,
             name,
@@ -91,6 +78,7 @@ export const addHospital = async (req, res) => {
                             adminId: admin?.id,
                             hospitalId: newHospital._id,
                             departmentName: dep?.departmentName,
+                            appointmentFees : doc?.appointmentFees,
                             role: 'doctor',
                             // signatureImage: doc.signatureImage,
                         });
@@ -628,9 +616,6 @@ export const addPersonalAssitant = async (req, res) => {
 
         const { doctorName, email, contact, password, creationfor, docId, hosId } = req.body
         const superAdmin = req.user
-
-        console.log(req.body);
-
 
         const checkAdmin = await UserModel.findOne({ email: email, isDeleted: false, role: 'admin' })
         if (checkAdmin) return res.status(400).json({ message: 'email already exist' })

@@ -24,6 +24,7 @@ const UserShcema = new mongoose.Schema({
     role: { type: String, default: '' },
     status: { type: Boolean, default: false },
     image: { type: String, default: '' },
+    appointmentFees: { type: Number, default: 0 },
     isDeleted: {
         type: Boolean,
         default: false,

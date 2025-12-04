@@ -55,10 +55,6 @@ export const getAllPatientRecords = async (req, res) => {
         let query = {
             doctorId: profile?.doctorId
         }
-
-        console.log(req.query);
-
-
         if (date) {
             const selected = new Date(date);
             const start = selected.setHours(0, 0, 0, 0);
@@ -78,7 +74,6 @@ export const getAllPatientRecords = async (req, res) => {
         else if (status === "postponed") {
             query.status = "Postponed"
         }
-
         else if (status === "cancel") {
             query.status = "Cancel"
         }
@@ -96,6 +91,8 @@ export const getAllPatientRecords = async (req, res) => {
             query.updatedAt = { $gte: startOfDay, $lte: endOfDay }
         }
 
+        console.log("queet", query);
+        
         const TodayPatient = await PatientModel.find(query)
             .sort({ updatedAt: -1 }) // latest first
             .populate('initialAssementId')

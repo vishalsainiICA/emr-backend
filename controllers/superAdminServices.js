@@ -386,6 +386,10 @@ export const allPatients = async (req, res) => {
             query.status = "Postponed";
         }
 
+        else if (status === "rx-done") {
+            query.prescribtionId = { $ne: null }
+        }
+
         // 🔹 4) STATUS = CANCEL
         else if (status === "cancel") {
             query.status = "Cancel";
@@ -397,7 +401,7 @@ export const allPatients = async (req, res) => {
         // 🔹 6) DEFAULT → TODAY
 
 
-        const patients = await PatientModel.find(query).populate('hospitalId doctorId prescribtionId initialAssementId')
+        const patients = await PatientModel.find(query).populate('hospitalId doctorId prescribtionId initialAssementId').sort({ updatedAt: -1 })
 
         return res.status(200).json({
             message: "success",
