@@ -106,6 +106,38 @@ export const getProfile = async (req, res) => {
 
     }
 }
+export const editProfile = async (req, res) => {
+
+    try {
+        const user = req.user
+        const { name, email, contact, oldPassword, newPassword } = req.body;
+
+        console.log(req.body);
+
+        const profile = await UserModel.findById(user?.id)
+        if (!profile) return res.status(404).json({ message: "user not found" });
+
+        if (oldPassword) {
+            if (oldPassword !== profile.password) return res.status(402).json({ message: "Incorrect Password" });
+        }
+        const updated = await UserModel.findByIdAndUpdate(profile._id, {
+            $set: {
+                name: name || profile.name,
+                email: email || profile.email,
+                contact: contact || profile.contact,
+                password: newPassword
+            }
+        }, {
+            new: true
+        })
+
+        return res.status(200).json({ message: "Success", data: updated });
+    } catch (error) {
+        console.log(error)
+        return res.status(500).json({ message: "Internal Server Error" });
+
+    }
+}
 export const addAdmin = async (req, res) => {
     console.log(req.body);
     try {
