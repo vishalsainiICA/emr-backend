@@ -1,3 +1,4 @@
+import AuthUserModel from "../models/authUserModel.js";
 import InitialAssesment from "../models/initialAssessmentModel.js"
 import PatientModel from "../models/patientModel.js";
 import UserModel from "../models/userModel.js";
@@ -129,8 +130,6 @@ export const editProfile = async (req, res) => {
         const user = req.user
         const { name, email, contact, oldPassword, newPassword } = req.body;
 
-        console.log(req.body);
-
         const profile = await UserModel.findById(user?.id)
         if (!profile) return res.status(404).json({ message: "user not found" });
 
@@ -147,8 +146,19 @@ export const editProfile = async (req, res) => {
         }, {
             new: true
         })
-
-        return res.status(200).json({ message: "Success", data: updated });
+        const updatedData = await AuthUserModel.findOneAndUpdate(
+            { refId: user?.id },
+            {
+                $set: {
+                    email: email || profile.email,
+                    contact: contact || profile.contact,
+                    ...(newPassword && { password: newPassword })   // only update if new password exists
+                }
+            },
+            { new: true }
+        );
+        if (updatedData) return res.status(200).json({ message: "Success", data: updatedData });
+        else return res.status(400).json({ message: "Error Update in Document", data: updatedData });
     } catch (error) {
         console.log(error)
         return res.status(500).json({ message: "Internal Server Error" });

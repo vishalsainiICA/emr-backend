@@ -7,6 +7,7 @@ import PrescribtionModel from "../models/prescribtionModel.js";
 import UserModel from "../models/userModel.js";
 import HospitalModel from "../models/hospital.js";
 import { updateAdmin } from "./superAdminServices.js";
+import AuthUserModel from "../models/authUserModel.js";
 
 
 export const getProfile = async (req, res) => {
@@ -45,8 +46,21 @@ export const editProfile = async (req, res) => {
         }, {
             new: true
         })
+        const updatedData = await AuthUserModel.findOneAndUpdate(
+            { refId: user?.id },
+            {
+                $set: {
+                    email: email || profile.email,
+                    contact: contact || profile.contact,
+                    ...(newPassword && { password: newPassword })   // only update if new password exists
+                }
+            },
+            { new: true }
+        );
 
-        return res.status(200).json({ message: "Success", data: updated });
+        if (updatedData) return res.status(200).json({ message: "Success", data: updatedData });
+
+        else return res.status(400).json({ message: "Error Update in Document", data: updatedData });
     } catch (error) {
         console.log(error)
         return res.status(500).json({ message: "Internal Server Error" });
