@@ -78,7 +78,7 @@ export const addHospital = async (req, res) => {
                             adminId: admin?.id,
                             hospitalId: newHospital._id,
                             departmentName: dep?.departmentName,
-                            appointmentFees : doc?.appointmentFees,
+                            appointmentFees: doc?.appointmentFees,
                             role: 'doctor',
                             // signatureImage: doc.signatureImage,
                         });
@@ -716,4 +716,37 @@ export const changePatientStatus = async (req, res) => {
         res.status(500).json({ message: "Internal Server Error" });
     }
 };
+
+
+
+export const editHospital = async (req, res) => {
+
+    try {
+
+        const { name, state, city, pinCode, address, patientCategories, hospitalId } = req.body;
+        if (!hospitalId) return res.status(404).json({ message: "hospitalId is required" });
+
+        const updated = await HospitalModel.findByIdAndUpdate(hospitalId, {
+            $set: {
+                name: name || name,
+                state: state || state,
+                city: city || city,
+                pinCode: pinCode,
+                address: address,
+                patientCategories: patientCategories
+            }
+        }, {
+            new: true
+        })
+
+        if (updated) return res.status(200).json({ message: "Success", data: updated });
+        else return res.status(404).json({ message: "Hospital Not Found"});
+
+
+    } catch (error) {
+        console.log(error)
+        return res.status(500).json({ message: "Internal Server Error" });
+
+    }
+}
 
