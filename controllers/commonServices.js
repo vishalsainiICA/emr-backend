@@ -6,8 +6,6 @@ import DepartmentModel from "../models/departmentModel.js";
 import PatientModel from "../models/patientModel.js";
 
 
-
-
 export const addHospital = async (req, res) => {
     try {
         const {
@@ -259,15 +257,14 @@ export const findHospitalById = async (req, res) => {
         if (!id) return res.status(400).json({ message: 'hospital id is requried' })
         const hosptial = await HospitalModel.findOne({
             _id: id, isDeleted: false,
-            "supportedDepartments.doctorIds": { $elemMatch: { isDeleted: false } }
         }).populate({
             path: "supportedDepartments",
             populate: {
                 path: "doctorIds",
-
-
+                match: { isDeleted: false },
                 populate: {
-                    path: "personalAssitantId"
+                    path: "personalAssitantId",
+                    match: { isDeleted: false },
                 }
             },
         }).populate('medicalDirector')

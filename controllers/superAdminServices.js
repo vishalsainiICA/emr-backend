@@ -142,11 +142,11 @@ export const editProfile = async (req, res) => {
             { new: true }
         );
 
-        if(updatedData)  return res.status(200).json({ message: "Success", data: updatedData });
+        if (updatedData) return res.status(200).json({ message: "Success", data: updatedData });
 
-        else  return res.status(400).json({ message: "Error Update in Document", data: updatedData });
+        else return res.status(400).json({ message: "Error Update in Document", data: updatedData });
 
-       
+
     } catch (error) {
         console.log(error)
         return res.status(500).json({ message: "Internal Server Error" });
@@ -312,7 +312,7 @@ export const deletePa = async (req, res) => {
         }
         const result = await UserModel.findByIdAndUpdate(id, {
             $set: {
-                personalAssitantId: null
+                isDeleted: true
             }
         }, { new: true })
         if (!result) return res.status(400).json({ message: "doctor not found" });
