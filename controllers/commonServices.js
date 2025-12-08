@@ -4,7 +4,7 @@ import HospitalModel from "../models/hospital.js";
 import UserModel from "../models/userModel.js";
 import DepartmentModel from "../models/departmentModel.js";
 import PatientModel from "../models/patientModel.js";
-import { populate } from "dotenv";
+
 
 
 
@@ -78,7 +78,7 @@ export const addHospital = async (req, res) => {
                             adminId: admin?.id,
                             hospitalId: newHospital._id,
                             departmentName: dep?.departmentName,
-                            appointmentFees : doc?.appointmentFees,
+                            appointmentFees: doc?.appointmentFees,
                             role: 'doctor',
                             // signatureImage: doc.signatureImage,
                         });
@@ -257,10 +257,15 @@ export const findHospitalById = async (req, res) => {
         console.log(id);
 
         if (!id) return res.status(400).json({ message: 'hospital id is requried' })
-        const hosptial = await HospitalModel.findOne({ _id: id, isDeleted: false }).populate({
+        const hosptial = await HospitalModel.findOne({
+            _id: id, isDeleted: false,
+            "supportedDepartments.doctorIds": { $elemMatch: { isDeleted: false } }
+        }).populate({
             path: "supportedDepartments",
             populate: {
                 path: "doctorIds",
+
+
                 populate: {
                     path: "personalAssitantId"
                 }
@@ -716,4 +721,63 @@ export const changePatientStatus = async (req, res) => {
         res.status(500).json({ message: "Internal Server Error" });
     }
 };
+
+export const editHospital = async (req, res) => {
+
+    try {
+
+        const { name, state, city, pinCode, address, patientCategories, hospitalId } = req.body;
+        if (!hospitalId) return res.status(404).json({ message: "hospitalId is required" });
+
+        const updated = await HospitalModel.findByIdAndUpdate(hospitalId, {
+            $set: {
+                name: name || name,
+                state: state || state,
+                city: city || city,
+                pinCode: pinCode,
+                address: address,
+                patientCategories: patientCategories
+            }
+        }, {
+            new: true
+        })
+
+        if (updated) return res.status(200).json({ message: "Success", data: updated });
+        else return res.status(404).json({ message: "Hospital Not Found" });
+
+
+    } catch (error) {
+        console.log(error)
+        return res.status(500).json({ message: "Internal Server Error" });
+
+    }
+}
+
+
+export const removeDoctorById = async (req, res) => {
+
+    try {
+
+        const { docId } = req.query;
+        if (!docId) return res.status(404).json({ message: "docId is required" });
+
+        const updated = await UserModel.findByIdAndUpdate(docId, {
+            $set: {
+                isDeleted: true
+            }
+        }, {
+            new: true
+        })
+
+        if (updated) return res.status(200).json({ message: "Success", data: updated });
+        else return res.status(404).json({ message: "doctor  Not Found" });
+
+
+    } catch (error) {
+        console.log(error)
+        return res.status(500).json({ message: "Internal Server Error" });
+
+    }
+}
+
 

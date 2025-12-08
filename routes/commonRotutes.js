@@ -1,7 +1,7 @@
 import express from "express";
 import { verifyToken } from "../utills/jwtToken.js";
 
-import { addBranch, addHospital, addSingleDepartment, changePatientStatus, deleteHospital, deleteSingleDepartment, findHospitalById, patientsByHospitalById, registerPatient, updateHospital } from "../controllers/commonServices.js";
+import { addBranch, addHospital, addSingleDepartment, changePatientStatus, deleteHospital, deleteSingleDepartment, editHospital, findHospitalById, patientsByHospitalById, registerPatient, removeDoctorById, updateHospital } from "../controllers/commonServices.js";
 import upload from "../middlewares/multer.js";
 
 
@@ -20,6 +20,7 @@ app.post('/hospital/addHospital', upload.fields([
     }
 ]), addHospital);
 app.post('/hospital/add-branch', verifyToken, addBranch);
+app.put('/hospital/edit-hospital',upload.none(), editHospital);
 app.get('/hospital/single-hospital', findHospitalById);
 app.put('/hospital/update-hospital', updateHospital)
 app.delete('/hospital/delete-hospital', deleteHospital)
@@ -35,6 +36,11 @@ app.post('/patient/register-patient', upload.fields([{ name: 'documents' },
 { name: "addharback" }
 
 ]), registerPatient)
+
+
+// doctor
+
+app.delete("/doctor/remove-doc",removeDoctorById)
 
 
 

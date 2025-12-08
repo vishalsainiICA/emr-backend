@@ -2,7 +2,7 @@
 
 import express from "express";
 import {
-    addAdmin, allPatients, deleteAdmin, deletePa, getAllAdmins,
+    addAdmin, allPatients, deleteAdmin, deletePa, editProfile, getAllAdmins,
     getAllHospital, getProfile,
     hosptialMetrices,
     hosptialPatients,
@@ -12,12 +12,14 @@ import {
 } from "../controllers/superAdminServices.js";
 import { verifyToken } from "../utills/jwtToken.js";
 import { addPersonalAssitant } from "../controllers/commonServices.js";
+import upload from "../middlewares/multer.js";
 
 
 const app = express.Router()
 
 app.post('/auth/register', signupSuperAdmin)
 app.get('/auth/profile', verifyToken, getProfile)
+app.put('/auth/edit-profile', upload.none(), verifyToken, editProfile)
 app.get('/hospital/getAllHospital', getAllHospital);
 app.get('/hospital/hosptial-metrices', hosptialMetrices);
 app.post('/admin/add-admin', addAdmin)
