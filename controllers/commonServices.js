@@ -4,7 +4,7 @@ import HospitalModel from "../models/hospital.js";
 import UserModel from "../models/userModel.js";
 import DepartmentModel from "../models/departmentModel.js";
 import PatientModel from "../models/patientModel.js";
-import { populate } from "dotenv";
+
 
 
 
@@ -257,10 +257,15 @@ export const findHospitalById = async (req, res) => {
         console.log(id);
 
         if (!id) return res.status(400).json({ message: 'hospital id is requried' })
-        const hosptial = await HospitalModel.findOne({ _id: id, isDeleted: false }).populate({
+        const hosptial = await HospitalModel.findOne({
+            _id: id, isDeleted: false,
+            "supportedDepartments.doctorIds": { $elemMatch: { isDeleted: false } }
+        }).populate({
             path: "supportedDepartments",
             populate: {
                 path: "doctorIds",
+
+
                 populate: {
                     path: "personalAssitantId"
                 }
@@ -717,8 +722,6 @@ export const changePatientStatus = async (req, res) => {
     }
 };
 
-
-
 export const editHospital = async (req, res) => {
 
     try {
@@ -740,7 +743,7 @@ export const editHospital = async (req, res) => {
         })
 
         if (updated) return res.status(200).json({ message: "Success", data: updated });
-        else return res.status(404).json({ message: "Hospital Not Found"});
+        else return res.status(404).json({ message: "Hospital Not Found" });
 
 
     } catch (error) {
@@ -749,4 +752,32 @@ export const editHospital = async (req, res) => {
 
     }
 }
+
+
+export const removeDoctorById = async (req, res) => {
+
+    try {
+
+        const { docId } = req.query;
+        if (!docId) return res.status(404).json({ message: "docId is required" });
+
+        const updated = await UserModel.findByIdAndUpdate(docId, {
+            $set: {
+                isDeleted: true
+            }
+        }, {
+            new: true
+        })
+
+        if (updated) return res.status(200).json({ message: "Success", data: updated });
+        else return res.status(404).json({ message: "doctor  Not Found" });
+
+
+    } catch (error) {
+        console.log(error)
+        return res.status(500).json({ message: "Internal Server Error" });
+
+    }
+}
+
 
