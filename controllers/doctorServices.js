@@ -1,12 +1,10 @@
 
 import status from "statuses";
 import IllnessModel from "../models/illnessModel.js";
-import InitialAssesment from "../models/initialAssessmentModel.js";
 import PatientModel from "../models/patientModel.js";
 import PrescribtionModel from "../models/prescribtionModel.js";
 import UserModel from "../models/userModel.js";
 import HospitalModel from "../models/hospital.js";
-import { updateAdmin } from "./superAdminServices.js";
 import AuthUserModel from "../models/authUserModel.js";
 
 
@@ -237,60 +235,87 @@ export const getAllPatientRecords = async (req, res) => {
 
 export const savePrescribtion = async (req, res) => {
     try {
+        const {
+            hospitalId,
+            patientId,
+            doctorId,
+            initialAssementId,
+            prescriptionType,
+            prescriptionMediciene,
+            illness,
+            symptoms,
+            labTest
+        } = req.body;
 
-        const { hospitalId } = req.body
-
-        if (!hospitalId) return res.status(400).json({
-            message: 'hospital id is not found'
-        })
-        const obj =
-        {
-            "patientId": req.body.patientId,
-            "initialAssementId": req.body.initialAssementId,
-            "doctorId": req.body.doctorId,
-            "hospitalId": req.body.hospitalId,
-            "prescriptionType": req.body.prescriptionType,
-            "prescriptionMediciene": req.body.prescriptionMediciene,
-            "illness": req.body.illness,
-            "symptoms": req.body.symptoms,
-            "labTest": req.body.labTest,
-            "prescriptionImage": req.file.path.replace(/\\/g, "/"),
+        if (!hospitalId || !patientId || !doctorId) {
+            return res.status(400).json({
+                message: "Required fields missing: hospitalId, patientId, doctorId"
+            });
         }
 
-        const pris = await PrescribtionModel.create(obj)
+        // check file upload
+        const prescriptionImage = req.file?.path
+            ? req.file.path.replace(/\\/g, "/")
+            : null;
 
-        const result = await PatientModel.findByIdAndUpdate(req.body.patientId, {
-            $set: {
-                prescribtionId: pris._id
+        const doctorProfile = await UserModel.findById(doctorId);
+        if (!doctorProfile) {
+            return res.status(404).json({ message: "Doctor not found" });
+        }
+
+        const doctorFee = doctorProfile.appointmentFees || 0;
+
+        // payload object
+        const obj = {
+            patientId,
+            initialAssementId,
+            doctorId,
+            hospitalId,
+            prescriptionType,
+            prescriptionMediciene,
+            illness,
+            symptoms,
+            labTest,
+            prescriptionfees: doctorFee,
+            prescriptionImage
+        };
+
+        // 1. Create prescription
+        const prescription = await PrescribtionModel.create(obj);
+
+        // 2. Update patient
+        const updatedPatient = await PatientModel.findByIdAndUpdate(
+            patientId,
+            { $set: { prescribtionId: prescription._id } },
+            { new: true }
+        );
+
+        if (!updatedPatient) {
+            return res.status(400).json({ message: "Patient update failed" });
+        }
+
+        // 3. Update hospital stats in one go
+        await HospitalModel.findByIdAndUpdate(
+            hospitalId,
+            {
+                $inc: {
+                    totalPrescribtion: 1,
+                    totalRevenue: doctorFee
+                }
             }
-        }, {
-            new: true
-        })
+        );
 
-        await HospitalModel.findByIdAndUpdate(hospitalId, {
-            $inc: {
-                totalPrescribtion: 1
-            }
-        }, {
-            new: true
-        })
-
-        if (result) {
-            return res.status(200).json({
-                message: 'success', data: result
-            })
-        }
-        else {
-            return res.status(300).json({
-                message: 'Kindly Data not Updated'
-            })
-        }
+        return res.status(200).json({
+            message: "Success",
+            data: updatedPatient
+        });
 
     } catch (error) {
-        console.error(error);
-        res.status(500).json({ message: "Internal Server Error" });
+        console.error("savePrescribtion Error:", error);
+        return res.status(500).json({ message: "Internal Server Error" });
     }
-}
+};
+
 
 export const dailyActivity = async (req, res) => {
     try {

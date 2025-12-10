@@ -1,7 +1,6 @@
 import jwt from "jsonwebtoken";
 import AuthUserModel from "../models/authUserModel.js";
 import UserModel from "../models/userModel.js";
-import PersonalAssitantModel from "../models/personalAssitantModel.js";
 
 export const generateToken = (user) => {
     try {

@@ -5,7 +5,6 @@ import AuthUserModel from '../models/authUserModel.js';
 import HospitalModel from '../models/hospital.js';
 import UserModel from '../models/userModel.js';
 import PatientModel from '../models/patientModel.js';
-import PersonalAssitantModel from '../models/personalAssitantModel.js';
 import PrescribtionModel from '../models/prescribtionModel.js';
 
 
@@ -327,7 +326,7 @@ export const deletePa = async (req, res) => {
 export const getAllHospital = async (req, res) => {
 
     try {
-        const hosptials = await HospitalModel.find({ isDeleted: false })
+        const hosptials = await HospitalModel.find({ isDeleted: false }).sort({ updatedAt: -1 })
             .populate({
                 path: "supportedDepartments",
                 populate: {
@@ -365,7 +364,7 @@ export const hosptialMetrices = async (req, res) => {
             HospitalModel.aggregate([
                 { $match: { isDeleted: false } },
             ]),
-            HospitalModel.find({ isDeleted: false }).sort({ totalRevenue: -1 }).limit(10).populate("medicalDirector"),
+            HospitalModel.find({ isDeleted: false }).sort({ totalRevenue: -1 }).limit(10).populate("medicalDirector").limit(10),
             PrescribtionModel.countDocuments({ isDeleted: false }),
 
         ])

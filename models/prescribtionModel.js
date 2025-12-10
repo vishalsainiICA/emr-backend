@@ -24,6 +24,13 @@ const prescribtionShehma = mongoose.Schema({
         default: null
     },
 
+    prescriptionfees: {
+        // final prescription || provisional prescription
+        type: Number,
+        default: null
+    },
+
+
     illness: {
         type: Array,
         default: null

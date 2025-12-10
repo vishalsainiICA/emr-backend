@@ -23,7 +23,7 @@ export const addHospital = async (req, res) => {
         const admin = req.user;
 
         const directorPath = req.files?.medicalDirectorImage?.[0]?.path?.replace(/\\/g, "/") || null;
-        const watermarkPath = req.files?.watermarkImg?.[0]?.path?.replace(/\\/g, "/") || null;
+        // const watermarkPath = req.files?.watermarkImg?.[0]?.path?.replace(/\\/g, "/") || null;
         const newHospital = await HospitalModel.create({
             adminId: admin?.id,
             name,
@@ -490,12 +490,15 @@ export const registerPatient = async (req, res) => {
             PatientModel.findOne({ phone: phone })
         ]);
 
-        // if (existPhone) {
-        //     return res.status(409).json({
-        //         success: false,
-        //         message: "Phone Number Already Exist!"
-        //     });
-        // }
+        console.log(existPhone);
+        
+
+        if (existPhone) {
+            return res.status(409).json({
+                success: false,
+                message: "Phone Number Already Exist!"
+            });
+        }
 
 
         const patientUid = `${req.body.name.trim().slice(0, 4).toUpperCase()}${totalDocument}`.trim();
@@ -560,13 +563,15 @@ export const registerPatient = async (req, res) => {
         const newPatient = new PatientModel(object);
         await newPatient.save();
 
-        const result = HospitalModel.findByIdAndUpdate(hospitalId, {
+        const result = await HospitalModel.findByIdAndUpdate(hospitalId, {
             $inc: {
                 totalPatient: 1
             }
         }, {
             new: true
         })
+        console.log(result);
+        
         if (result) {
             return res.status(200).json({
                 success: true,
