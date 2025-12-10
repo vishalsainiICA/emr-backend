@@ -623,7 +623,7 @@ export const addPersonalAssitant = async (req, res) => {
     try {
 
 
-        const { doctorName, email, contact, password, creationfor, docId, hosId, qualification, experience , gender} = req.body
+        const { doctorName, email, contact, password, creationfor, docId, hosId, qualification, experience, gender } = req.body
         const superAdmin = req.user
 
         const checkAdmin = await UserModel.findOne({ email: email, isDeleted: false, role: 'admin' })
@@ -773,6 +773,31 @@ export const removeDoctorById = async (req, res) => {
                 isDeleted: true
             }
         }, {
+            new: true
+        })
+
+        if (updated) return res.status(200).json({ message: "Success", data: updated });
+        else return res.status(404).json({ message: "doctor  Not Found" });
+
+
+    } catch (error) {
+        console.log(error)
+        return res.status(500).json({ message: "Internal Server Error" });
+
+    }
+}
+
+export const updateProfile = async (req, res) => {
+
+    console.log(req.body);
+
+
+    try {
+
+        const docId = req.body._id;
+        if (!docId) return res.status(404).json({ message: "docId is required" });
+
+        const updated = await UserModel.findByIdAndUpdate(docId,req.body, {
             new: true
         })
 
