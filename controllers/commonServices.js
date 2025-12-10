@@ -491,7 +491,7 @@ export const registerPatient = async (req, res) => {
         ]);
 
         console.log(existPhone);
-        
+
 
         if (existPhone) {
             return res.status(409).json({
@@ -571,7 +571,7 @@ export const registerPatient = async (req, res) => {
             new: true
         })
         console.log(result);
-        
+
         if (result) {
             return res.status(200).json({
                 success: true,
@@ -618,10 +618,12 @@ export const patientsByHospitalById = async (req, res) => {
 }
 
 export const addPersonalAssitant = async (req, res) => {
+    console.log(req.body);
+
     try {
 
 
-        const { doctorName, email, contact, password, creationfor, docId, hosId } = req.body
+        const { doctorName, email, contact, password, creationfor, docId, hosId, qualification, experience , gender} = req.body
         const superAdmin = req.user
 
         const checkAdmin = await UserModel.findOne({ email: email, isDeleted: false, role: 'admin' })
@@ -635,8 +637,11 @@ export const addPersonalAssitant = async (req, res) => {
             name: doctorName,
             contact: contact,
             creationfor: creationfor,
+            experience: experience,
+            qualification: qualification,
             email: email,
             password: password,
+            gender: gender,
             hospitalId: hosId,
             doctorId: docId
         })

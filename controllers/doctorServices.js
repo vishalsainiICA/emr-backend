@@ -295,15 +295,19 @@ export const savePrescribtion = async (req, res) => {
         }
 
         // 3. Update hospital stats in one go
-        await HospitalModel.findByIdAndUpdate(
+        const hosptial = await HospitalModel.findByIdAndUpdate(
             hospitalId,
             {
                 $inc: {
                     totalPrescribtion: 1,
-                    totalRevenue: doctorFee
+                    totalRevenue: Number(doctorFee) || 0
                 }
-            }
+            },
+            { new: true }
         );
+
+        console.log(hosptial);
+
 
         return res.status(200).json({
             message: "Success",
