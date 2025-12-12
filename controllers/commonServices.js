@@ -337,11 +337,12 @@ export const deleteHospital = async (req, res) => {
 }
 
 export const addDepartments = async (req, res) => {
+     console.log(JSON.stringify(req.body));
     try {
         const { hospitalId, departments } = req.body;
         const admin = req.admin;
 
-        console.log(req.body);
+       
         
 
         if (!hospitalId) {
@@ -410,6 +411,8 @@ export const addDepartments = async (req, res) => {
         if (!hospital) {
             return res.status(404).json({ message: "Hospital not found" });
         }
+        console.log("hos",hospital);
+        
 
         return res.status(200).json({
             message: "Departments added successfully",
