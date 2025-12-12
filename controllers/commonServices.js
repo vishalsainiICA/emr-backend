@@ -336,73 +336,90 @@ export const deleteHospital = async (req, res) => {
     }
 }
 
-export const addSingleDepartment = async (req, res) => {
-    console.log(req.body);
-
+export const addDepartments = async (req, res) => {
     try {
-        const id = req.query.hospitalId;
-        const admin = req.user;
+        const { hospitalId, departments } = req.body;
+        const admin = req.admin;
 
-        if (!id) return res.status(400).json({ message: 'Hospital ID is required' });
+        console.log(req.body);
+        
 
-        const departmentData = req.body;
-        if (!departmentData) {
-            return res.status(400).json({ message: 'Department data is required' });
+        if (!hospitalId) {
+            return res.status(400).json({ message: "Hospital ID is required" });
         }
 
-        // Create doctors if any
-        const doctorIds = await Promise.all(
-            (departmentData.doctor || []).map(async (doc) => {
-                const newDoctor = await UserModel.create({
-                    name: doc.name,
-                    email: doc.email,
-                    password: doc.password,
-                    contact: doc.contact,
-                    licenseNo: doc.licenseNo,
-                    adminId: admin?.id,
-                    hospitalId: id,
-                    role: 'doctor',
-                    signatureImage: doc.signatureImage,
+        if (!Array.isArray(departments) || departments.length === 0) {
+            return res.status(400).json({ message: "Departments data is required" });
+        }
+
+        const departmentsIds = await Promise.all(
+            departments.map(async (dep) => {
+                /** CREATE DOCTORS FIRST **/
+                const doctorIds = await Promise.all(
+                    (dep.doctors || []).map(async (doc) => {
+                        const newDoctor = await UserModel.create({
+                            name: doc.name,
+                            email: doc.email,
+                            contact: doc.contact,
+                            qualification: doc.qualification,
+                            appointmentFees: doc.appointmentFees,
+                            gender: doc.gender,
+                            password: doc.password,
+                            adminId: admin?._id,
+                            hospitalId,
+                            role: "doctor",
+                            signatureImage: doc.signatureImage,
+                        });
+
+                        await AuthUserModel.create({
+                            email: doc.email,
+                            password: doc.password,
+                            contact: doc.contact,
+                            role: "doctor",
+                            refId: newDoctor._id,
+                        });
+
+                        return newDoctor._id;
+                    })
+                );
+
+                /** CREATE DEPARTMENT **/
+
+                const newDepartment = await DepartmentModel.create({
+                    departmentName: dep.departmentName,
+                    image: dep.image,
+                    doctorIds: doctorIds,
+                    hospitalId,
+                    adminId: admin?._id,
                 });
 
-                await AuthUserModel.create({
-                    email: doc.email,
-                    password: doc.password,
-                    contact: doc.contact,
-                    role: 'doctor',
-                    refId: newDoctor._id,
-                });
+                console.log("new Dpertmentsd" ,newDepartment);
+                
 
-                return newDoctor._id;
+                return newDepartment._id;
             })
         );
 
-        // Create the department
-        const newDepartment = await DepartmentModel.create({
-            departmentName: departmentData.departmentName || null,
-            doctorIds: doctorIds,
-            adminId: admin?.id,
-            hospitalId: id,
-        });
-
-        // Update hospital with new department
+        /** UPDATE HOSPITAL **/
         const hospital = await HospitalModel.findByIdAndUpdate(
-            id,
-            { $push: { supportedDepartments: newDepartment._id } },
+            hospitalId,
+            { $push: { supportedDepartments: { $each: departmentsIds } } },
             { new: true }
         );
 
-        if (!hospital)
-            return res.status(404).json({ message: 'Hospital not found' });
+        if (!hospital) {
+            return res.status(404).json({ message: "Hospital not found" });
+        }
 
         return res.status(200).json({
-            message: 'Department added successfully',
-            data: { hospital, newDepartment },
+            message: "Departments added successfully",
+            data: hospital,
         });
+
     } catch (error) {
         console.error(error);
         return res.status(500).json({
-            message: 'Internal Server Error',
+            message: "Internal Server Error",
             error: error.message,
         });
     }
@@ -623,7 +640,7 @@ export const addPersonalAssitant = async (req, res) => {
     try {
 
 
-        const { doctorName, email, contact, password, creationfor, docId, hosId, qualification, experience, gender } = req.body
+        const { name, email, contact, password, creationfor, docId, hosId, qualification, experience, gender } = req.body
         const superAdmin = req.user
 
         const checkAdmin = await UserModel.findOne({ email: email, isDeleted: false, role: 'admin' })
@@ -634,7 +651,7 @@ export const addPersonalAssitant = async (req, res) => {
         const newPa = await UserModel.create({
             adminId: superAdmin?.id,
             role: 'personalAssitant',
-            name: doctorName,
+            name: name,
             contact: contact,
             creationfor: creationfor,
             experience: experience,
@@ -797,7 +814,7 @@ export const updateProfile = async (req, res) => {
         const docId = req.body._id;
         if (!docId) return res.status(404).json({ message: "docId is required" });
 
-        const updated = await UserModel.findByIdAndUpdate(docId,req.body, {
+        const updated = await UserModel.findByIdAndUpdate(docId, req.body, {
             new: true
         })
 

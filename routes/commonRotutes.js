@@ -1,7 +1,7 @@
 import express from "express";
 import { verifyToken } from "../utills/jwtToken.js";
 
-import { addBranch, addHospital, addSingleDepartment, changePatientStatus, deleteHospital, deleteSingleDepartment, editHospital, findHospitalById, patientsByHospitalById, registerPatient, removeDoctorById, updateHospital, updateProfile } from "../controllers/commonServices.js";
+import { addBranch, addHospital, addDepartments, changePatientStatus, deleteHospital, deleteSingleDepartment, editHospital, findHospitalById, patientsByHospitalById, registerPatient, removeDoctorById, updateHospital, updateProfile } from "../controllers/commonServices.js";
 import upload from "../middlewares/multer.js";
 
 
@@ -25,7 +25,7 @@ app.get('/hospital/single-hospital', findHospitalById);
 app.put('/hospital/update-hospital', updateHospital)
 app.delete('/hospital/delete-hospital', deleteHospital)
 app.delete('/hospital/delete-department', deleteSingleDepartment)
-app.post('/hospital/new-department', addSingleDepartment)
+app.post('/hospital/new-department', addDepartments)
 app.get('/hospital/all-patients', patientsByHospitalById)
 app.put("/hospital/update-profile", updateProfile)
 app.put('/change-status', changePatientStatus)
