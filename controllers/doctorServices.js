@@ -185,6 +185,7 @@ export const getAllPatientRecords = async (req, res) => {
 
             PatientModel.find(query)
                 .sort({ updatedAt: -1 })
+                .populate('prescribtionId')
                 .populate("initialAssementId"),
 
             PatientModel.countDocuments({
