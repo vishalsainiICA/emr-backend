@@ -158,9 +158,6 @@ export const addAdmin = async (req, res) => {
         const { name, email, contact, password, creationfor, experience } = req.body
         const superAdmin = req.user
 
-
-
-
         const checkAdmin = await UserModel.findOne({ email: email, isDeleted: false, role: 'admin' })
         if (checkAdmin) return res.status(400).json({ message: 'email already exist' })
 
@@ -203,14 +200,14 @@ export const updateAdmin = async (req, res) => {
             return res.status(400).json({ message: "admin id is required" });
         }
 
-        const { name, email, password, contact } = req.body;
+        const { name, email, password, contact , creationfor } = req.body;
         const updatedData = {};
 
         if (name) updatedData.name = name;
         if (email) updatedData.email = email;
         if (contact) updatedData.contact = contact;
         if (password) updatedData.password = password;
-
+        if(creationfor) updatedData.creationfor = creationfor
 
         // Update both AuthUser and User documents parallelly
         const [authAdmin, userAdmin] = await Promise.all([
@@ -363,6 +360,14 @@ export const hosptialMetrices = async (req, res) => {
 
             HospitalModel.aggregate([
                 { $match: { isDeleted: false } },
+                {
+                    $group: {
+                        _id: null,
+                        totalRevenue: { $sum: "$totalRevenue" }
+                    }
+                }
+
+
             ]),
             HospitalModel.find({ isDeleted: false }).sort({ totalRevenue: -1 }).limit(10).populate("medicalDirector").limit(10),
             PrescribtionModel.countDocuments({ isDeleted: false }),

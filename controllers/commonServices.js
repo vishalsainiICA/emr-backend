@@ -337,13 +337,13 @@ export const deleteHospital = async (req, res) => {
 }
 
 export const addDepartments = async (req, res) => {
-     console.log(JSON.stringify(req.body));
+    console.log(JSON.stringify(req.body));
     try {
         const { hospitalId, departments } = req.body;
         const admin = req.admin;
 
-       
-        
+
+
 
         if (!hospitalId) {
             return res.status(400).json({ message: "Hospital ID is required" });
@@ -394,8 +394,8 @@ export const addDepartments = async (req, res) => {
                     adminId: admin?._id,
                 });
 
-                console.log("new Dpertmentsd" ,newDepartment);
-                
+                console.log("new Dpertmentsd", newDepartment);
+
 
                 return newDepartment._id;
             })
@@ -411,8 +411,8 @@ export const addDepartments = async (req, res) => {
         if (!hospital) {
             return res.status(404).json({ message: "Hospital not found" });
         }
-        console.log("hos",hospital);
-        
+        console.log("hos", hospital);
+
 
         return res.status(200).json({
             message: "Departments added successfully",
@@ -807,6 +807,7 @@ export const removeDoctorById = async (req, res) => {
     }
 }
 
+
 export const updateProfile = async (req, res) => {
 
     console.log(req.body);
@@ -831,5 +832,44 @@ export const updateProfile = async (req, res) => {
 
     }
 }
+
+export const validateMobileNo = async (req, res) => {
+
+    console.log(req.body);
+
+    const { phone } = req.body
+
+    if (phone === '') {
+        return res.status(400).json({
+            message: 'please give phone number'
+        })
+
+
+    }
+
+
+    try {
+        const existPhone = await PatientModel.findOne({ phone: phone })
+
+
+        console.log(existPhone);
+
+        if (existPhone) {
+            return res.status(409).json({
+                success: false,
+                message: "Phone Number Already Exist!"
+            });
+        }
+
+        else return res.status(200).json({ message: "Success" });
+
+
+    } catch (error) {
+        console.log(error)
+        return res.status(500).json({ message: "Internal Server Error" });
+
+    }
+}
+
 
 

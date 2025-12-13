@@ -21,7 +21,7 @@ const UserShcema = new mongoose.Schema({
     totalPatient: { type: Number, default: 0 },
     totalPrescriptions: { type: Number, default: 0 },
     totalLabTests: { type: Number, default: 0 },
-    creationFor: { type: String, default: '' },
+    creationfor: { type: String, default: '' },
     role: { type: String, default: '' },
     status: { type: Boolean, default: false },
     image: { type: String, default: '' },
