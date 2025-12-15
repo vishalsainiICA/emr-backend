@@ -15,6 +15,10 @@ const patientSchema = new mongoose.Schema({
     hemoglobin: String,
     bodyTempreture: String,
     respiratoryRate: String,
+    selectedSym: {
+        type:Array,
+        default:[]
+    },
     isDeleted: {
         type: Boolean,
         default: false,

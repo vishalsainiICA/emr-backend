@@ -245,9 +245,9 @@ export const savePrescribtion = async (req, res) => {
             prescriptionMediciene,
             illness,
             symptoms,
-            labTest
-        } = req.body;
+            labTest,
 
+        } = req.body
         if (!hospitalId || !patientId || !doctorId) {
             return res.status(400).json({
                 message: "Required fields missing: hospitalId, patientId, doctorId"
@@ -320,7 +320,28 @@ export const savePrescribtion = async (req, res) => {
         return res.status(500).json({ message: "Internal Server Error" });
     }
 };
+export const verifyPin = async (req, res) => {
+    try {
+        const { tpin } = req.body;
 
+        if (!tpin) {
+            return res.status(400).json({ message: "Pin is required" });
+        }
+
+        // string compare
+        if (tpin !== "123456") {
+            return res.status(401).json({ message: "Pin is wrong" });
+        }
+
+        return res.status(200).json({
+            message: "Success",
+        });
+
+    } catch (error) {
+        console.error("Verify Pin:", error);
+        return res.status(500).json({ message: "Internal Server Error" });
+    }
+};
 
 export const dailyActivity = async (req, res) => {
     try {

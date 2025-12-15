@@ -28,6 +28,7 @@ export const saveInitialAssessments = async (req, res) => {
             hemoglobin: req.body.hemoglobin,
             bodyTempreture: req.body.bodyTempreture,
             respiratoryRate: req.body.respiratoryRate,
+            selectedSym: req.body.selectedSym
 
         });
         await patientAssement.save();
