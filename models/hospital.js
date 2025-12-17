@@ -13,6 +13,8 @@ const hospitalSchema = new mongoose.Schema(
         totalPatient: { type: Number, default: 0 },
         name: { type: String, required: true },
         state: { type: String, default: null },
+        totalBeds: { type: Number, default: 0 },
+        hospitalCategory: { type: String, default: null },
         city: { type: String, default: null },
         pinCode: { type: String },
         address: { type: String, default: null },

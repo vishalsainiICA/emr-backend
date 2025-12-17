@@ -17,6 +17,8 @@ export const addHospital = async (req, res) => {
             patientCategories,
             supportedDepartments,
             medicalDirector,
+            hospitalCategory,
+            totalBeds,
             customLetterPad
         } = req.body;
 
@@ -30,6 +32,8 @@ export const addHospital = async (req, res) => {
             city,
             state,
             pinCode,
+            totalBeds,
+            hospitalCategory,
             address,
             // medicalDirector: newMedicalDirector._id,
             // patientCategories: patientCategories || [],
