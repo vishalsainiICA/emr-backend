@@ -7,6 +7,8 @@ import PatientModel from "../models/patientModel.js";
 
 
 export const addHospital = async (req, res) => {
+    console.log(JSON.stringify(req.body));
+
     try {
         const {
             name,
@@ -48,7 +50,9 @@ export const addHospital = async (req, res) => {
             password: medicalDirector.password,
             contact: medicalDirector.contact,
             licenseNo: medicalDirector.experience,
+            gender: medicalDirector.gender,
             //signatureImage: medicalDirector.signatureImage,
+
             adminId: admin?.id,
             hospitalId: newHospital._id,
             image: directorPath,
@@ -75,6 +79,7 @@ export const addHospital = async (req, res) => {
                             password: doc.password,
                             experience: doc.experience,
                             qualification: doc.qualification,
+                            gender: doc.gender,
                             contact: doc.contact,
                             licenseNo: doc.licenseNo,
                             adminId: admin?.id,
