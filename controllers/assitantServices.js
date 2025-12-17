@@ -54,6 +54,7 @@ export const getAllPatientRecords = async (req, res) => {
         const date = req.query?.date
         const status = req.query?.status
         const profile = await UserModel.findById(user?.id)
+        
         let query = {
             doctorId: profile?.doctorId
         }
