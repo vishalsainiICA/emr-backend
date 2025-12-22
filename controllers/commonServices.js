@@ -501,7 +501,7 @@ export const updateSingleDoctor = async (req, res) => {
 
 
 export const registerPatient = async (req, res) => {
-     console.log(req.body);
+    console.log(req.body);
 
     try {
 
@@ -715,7 +715,7 @@ export const changePatientStatus = async (req, res) => {
     try {
         console.log(req.body);
 
-        const { id, newDate, cancelReason } = req.body;
+        const { id, newDate, cancelReason, type } = req.body;
 
         if (!id) {
             return res.status(400).json({ message: "id is required" });
@@ -723,8 +723,16 @@ export const changePatientStatus = async (req, res) => {
 
         let updateFields = {};
 
+        console.log(req.body);
+        
+
+        if (newDate && type) {
+            updateFields.updatedAt = new Date(newDate);  // Always convert to JS Date
+            updateFields.status = "Scheduled";
+        }
+
         //  If user is postponing appointment (date change)
-        if (newDate) {
+        if (newDate && type === null) {
             updateFields.updatedAt = new Date(newDate);  // Always convert to JS Date
             updateFields.status = "Postponed";           // optional
         }
