@@ -3,6 +3,7 @@ import { generateToken } from "../utills/jwtToken.js";
 import UserModel from "../models/userModel.js";
 import HospitalModel from "../models/hospital.js";
 import PatientModel from "../models/patientModel.js"
+import PrescribtionModel from "../models/prescribtionModel.js";
 
 
 export const getProfile = async (req, res) => {
@@ -116,22 +117,154 @@ export const allPatients = async (req, res) => {
 }
 export const hosptialPatients = async (req, res) => {
     try {
-        const user = req.user
-        const profile = await UserModel.findById(user?.id).populate('hospitalId')
-        if (!profile) return res.status(404).json({ message: "user not found" });
+        const user = req.user;
 
-        const patients = await PatientModel.find({ isDeleted: false, hospitalId: profile?.hospitalId, prescribtionId: { $ne: null } }).populate('hospitalId doctorId prescribtionId initialAssementId')
+        const profile = await UserModel
+            .findById(user?.id)
+            .populate('hospitalId');
 
+        if (!profile) {
+            return res.status(404).json({ message: "User not found" });
+        }
+
+        const { status } = req.query;
+
+        // -----------------------------
+        // 1 PATIENTS → ONLY TODAY
+        // -----------------------------
+        const todayStart = new Date();
+        todayStart.setHours(0, 0, 0, 0);
+
+        const todayEnd = new Date();
+        todayEnd.setHours(23, 59, 59, 999);
+
+        const patients = await PatientModel
+            .find({
+                isDeleted: false,
+                hospitalId: profile.hospitalId,
+                updatedAt: { $gte: todayStart, $lte: todayEnd }
+            })
+            .populate('hospitalId doctorId prescribtionId initialAssementId');
+
+        // -----------------------------
+        //  PRESCRIPTION DATE RANGE
+        // -----------------------------
+        let startDate;
+        let endDate = new Date();
+        const now = new Date();
+
+        // --------------------
+        // WEEKLY → last 7 days
+        // --------------------
+        if (status === "weekly") {
+
+            startDate = new Date();
+            startDate.setDate(now.getDate() - 6);
+
+            startDate.setHours(0, 0, 0, 0);
+            endDate.setHours(23, 59, 59, 999);
+        }
+
+        // --------------------
+        // MONTHLY → last 30 days
+        // --------------------
+        else if (status === "monthly") {
+
+            startDate = new Date();
+            startDate.setDate(now.getDate() - 29);
+
+            startDate.setHours(0, 0, 0, 0);
+            endDate.setHours(23, 59, 59, 999);
+        }
+
+        // --------------------
+        // YEARLY → last 365 days
+        // --------------------
+        else if (status === "yearly") {
+
+            startDate = new Date();
+            startDate.setDate(now.getDate() - 364);
+
+            startDate.setHours(0, 0, 0, 0);
+            endDate.setHours(23, 59, 59, 999);
+        }
+
+        // --------------------
+        // DEFAULT → today only
+        // --------------------
+        else {
+
+            startDate = new Date();
+            startDate.setHours(0, 0, 0, 0);
+
+            endDate.setHours(23, 59, 59, 999);
+        }
+        // -----------------------------
+        //  PRESCRIPTIONS → ONLY prescriptionFees
+        // -----------------------------
+        const prescriptions = await PrescribtionModel.find(
+            {
+                isDeleted: false,
+                hospitalId: profile.hospitalId,
+                createdAt: { $gte: startDate, $lte: endDate }
+            },
+            { prescriptionfees: 1, _id: 0 }
+        );
+
+        const fees = prescriptions.map(p => p.prescriptionfees);
+    
+
+        // -----------------------------
+        // RESPONSE
+        // -----------------------------
         return res.status(200).json({
             message: "success",
             status: 200,
-            data: patients
+            data: patients,
+            prescriptionPeriod: status || "today",
+            prescriptionFees: fees,
         });
 
     } catch (error) {
         console.error("Error:", error);
         return res.status(500).json({ message: "Internal Server Error" });
     }
-}
+};
 
+
+export const findHospital = async (req, res) => {
+
+    try {
+        const user = req.user
+        const profile = await UserModel.findById(user?.id)
+        if (!profile) return res.status(404).json({ message: "user not found" });
+
+        const id = profile?.hospitalId
+        if (!id) return res.status(400).json({ message: 'hospital id is requried' })
+
+
+        const hosptial = await HospitalModel.findOne({
+            _id: id, isDeleted: false,
+        }).populate({
+            path: "supportedDepartments",
+            populate: {
+                path: "doctorIds",
+                match: { isDeleted: false },
+                populate: {
+                    path: "personalAssitantId",
+                    match: { isDeleted: false },
+                }
+            },
+        }).populate('medicalDirector')
+
+        return res.status(200).json({
+            message: 'success', data: hosptial,
+        })
+
+    } catch (error) {
+        console.log(error);
+        return res.status(500).json({ message: 'Internal Server Error' })
+
+    }
+}
 

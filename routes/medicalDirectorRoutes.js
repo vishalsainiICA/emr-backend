@@ -1,6 +1,6 @@
 import express from "express";
 import { verifyToken } from "../utills/jwtToken.js";
-import { allPatients, findHospitalByMedicalDirectorId, getProfile, hosptialPatients } from "../controllers/medicalDirectorServices.js";
+import { allPatients, findHospital, findHospitalByMedicalDirectorId, getProfile, hosptialPatients } from "../controllers/medicalDirectorServices.js";
 
 
 
@@ -10,6 +10,7 @@ app.get('/auth/profile', verifyToken, getProfile)
 app.get('/getHospital', verifyToken, findHospitalByMedicalDirectorId)
 app.get('/patients/hospitalAllPaitent', verifyToken, hosptialPatients)
 app.get('/patients/allPatients',verifyToken, allPatients)
+app.get('/hospital/single-hospital',verifyToken, findHospital)
 // app.post('create-medicalDirector', createHospital)
 // app.get('/auth/profile', verifyToken, getProfile)
 
