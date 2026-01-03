@@ -23,8 +23,8 @@ const allowedOrigins = [
 
 app.use(cors({
 
-    origin: allowedOrigins,  // frontend ka address
-    // origin: "https://new-emr-pqlz.onrender.com",  // frontend ka address
+    // origin: allowedOrigins,  // frontend ka address
+    origin: "https://new-emr-pqlz.onrender.com",  // frontend ka address
     methods: ["GET", "POST", "PUT", "DELETE"],
     credentials: true
 }));
