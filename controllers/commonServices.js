@@ -66,7 +66,7 @@ export const addHospital = async (req, res) => {
                     (dep.doctors || []).map(async (doc) => {
                         console.log("doc", doc);
                         const newDoctor = await UserModel.create({
-                            name: doc.doctorName,
+                            name: doc.name,
                             email: doc.email,
                             password: doc.password,
                             experience: doc.experience,
@@ -786,11 +786,15 @@ export const updateProfile = async (req, res) => {
     try {
 
         const docId = req.body._id;
+ 
+        
         if (!docId) return res.status(404).json({ message: "docId is required" });
 
         const updated = await UserModel.findByIdAndUpdate(docId, req.body, {
             new: true
         })
+      
+        
 
         if (updated) return res.status(200).json({ message: "Success", data: updated });
         else return res.status(404).json({ message: "doctor  Not Found" });
