@@ -59,14 +59,6 @@ export const addHospital = async (req, res) => {
             role: 'medicalDirector'
         });
 
-        // Create Auth User for Medical Director
-        await AuthUserModel.create({
-            email: newMedicalDirector.email,
-            contact: newMedicalDirector.contact,
-            role: 'medicalDirector',
-            refId: newMedicalDirector._id
-        });
-
         //  Create Departments and Doctors
         const departmentIds = await Promise.all(
             supportedDepartments.map(async (dep) => {
@@ -88,14 +80,6 @@ export const addHospital = async (req, res) => {
                             appointmentFees: doc?.appointmentFees,
                             role: 'doctor',
                             // signatureImage: doc.signatureImage,
-                        });
-
-                        await AuthUserModel.create({
-                            email: doc.email,
-                            password: doc.password,
-                            contact: doc.contact,
-                            role: 'doctor',
-                            refId: newDoctor._id,
                         });
                         return newDoctor._id;
                     })
@@ -185,13 +169,7 @@ export const addBranch = async (req, res) => {
         });
 
         // Create Auth User for Medical Director
-        await AuthUserModel.create({
-            email: newMedicalDirector.email,
-            password: newMedicalDirector.password,
-            contact: newMedicalDirector.contact,
-            role: 'medicalDirector',
-            refId: newMedicalDirector._id
-        });
+
 
         //  Create Departments and Doctors
         const departmentIds = await Promise.all(
@@ -209,14 +187,6 @@ export const addBranch = async (req, res) => {
                             departmentName: dep?.departmentName,
                             role: 'doctor',
                             signatureImage: doc.signatureImage,
-                        });
-
-                        await AuthUserModel.create({
-                            email: doc.email,
-                            password: doc.password,
-                            contact: doc.contact,
-                            role: 'doctor',
-                            refId: newDoctor._id,
                         });
                         return newDoctor._id;
                     })
@@ -380,15 +350,6 @@ export const addDepartments = async (req, res) => {
                             role: "doctor",
                             signatureImage: doc.signatureImage,
                         });
-
-                        await AuthUserModel.create({
-                            email: doc.email,
-                            password: doc.password,
-                            contact: doc.contact,
-                            role: "doctor",
-                            refId: newDoctor._id,
-                        });
-
                         return newDoctor._id;
                     })
                 );
@@ -672,15 +633,10 @@ export const addPersonalAssitant = async (req, res) => {
             password: password,
             gender: gender,
             hospitalId: hosId,
-            doctorId: docId
+            doctorId: docId,
+               role: 'personalAssitant',
         })
-        await AuthUserModel.create({
-            contact: contact,
-            email: email,
-            password: password,
-            role: 'personalAssitant',
-            refId: newPa._id
-        })
+
         const updated = await UserModel.findByIdAndUpdate(docId, {
             $set: {
                 personalAssitantId: newPa._id
@@ -826,9 +782,6 @@ export const removeDoctorById = async (req, res) => {
 
 
 export const updateProfile = async (req, res) => {
-
-    console.log(req.body);
-
 
     try {
 

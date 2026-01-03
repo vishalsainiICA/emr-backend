@@ -22,7 +22,7 @@ const UserShcema = new mongoose.Schema({
     totalPrescriptions: { type: Number, default: 0 },
     totalLabTests: { type: Number, default: 0 },
     creationfor: { type: String, default: '' },
-    role: { type: String, default: '' },
+ role: { type: String, enum: ['superadmin', 'admin', 'medicalDirector', 'doctor', 'personalAssitant'] },
     status: { type: Boolean, default: false },
     image: { type: String, default: '' },
     appointmentFees: { type: Number, default: 0 },

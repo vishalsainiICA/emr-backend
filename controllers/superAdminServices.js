@@ -34,22 +34,12 @@ export const signupSuperAdmin = async (req, res) => {
         });
 
         await newUser.save();
-
-        const authUser = await AuthUserModel.create({
-            name,
-            email,
-            contact,
-            password: password,
-            role: 'superadmin',
-            refId: newUser?._id
-        })
-
         const token = generateToken(newUser);
 
         return res.status(201).json({
             message: "Signup Successful",
             token,
-            data: authUser?._id
+            data: newUser?._id
         });
     } catch (error) {
         console.log("Error in signup:", error);
@@ -129,21 +119,10 @@ export const editProfile = async (req, res) => {
         }, {
             new: true
         })
-        const updatedData = await AuthUserModel.findOneAndUpdate(
-            { refId: user?.id },
-            {
-                $set: {
-                    email: email || profile.email,
-                    contact: contact || profile.contact,
-                    ...(newPassword && { password: newPassword })   // only update if new password exists
-                }
-            },
-            { new: true }
-        );
 
-        if (updatedData) return res.status(200).json({ message: "Success", data: updatedData });
+        if (updated) return res.status(200).json({ message: "Success", data: updated });
 
-        else return res.status(400).json({ message: "Error Update in Document", data: updatedData });
+        else return res.status(400).json({ message: "Error Update in Document", data: updated });
 
 
     } catch (error) {
@@ -171,15 +150,9 @@ export const addAdmin = async (req, res) => {
             creationfor: creationfor,
             email: email,
             password: password,
-            experience: experience
+            experience: experience,
         })
-        await AuthUserModel.create({
-            contact: contact,
-            email: email,
-            password: password,
-            role: 'admin',
-            refId: newAdmin._id
-        })
+
         return res.status(200).json({
             message: "New Admin added successfully",
             status: 200,
