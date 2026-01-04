@@ -9,8 +9,6 @@ import medicalDirectorRoutes from './routes/medicalDirectorRoutes.js'
 import doctorRoutes from './routes/doctorRoutes.js'
 import commonRoutes from './routes/commonRotutes.js'
 import assitantRoutes from './routes/assitantRotues.js'
-import path from 'path'
-
 dotenv.config();
 const app = express();
 dbConnect();
@@ -23,8 +21,8 @@ const allowedOrigins = [
 
 app.use(cors({
 
-    // origin: allowedOrigins,  // frontend ka address
-    origin: "https://new-emr-pqlz.onrender.com",  // frontend ka address
+    origin: allowedOrigins,  // frontend ka address
+    // origin: "https://new-emr-pqlz.onrender.com",  // frontend ka address
     methods: ["GET", "POST", "PUT", "DELETE"],
     credentials: true
 }));
@@ -55,6 +53,8 @@ app.use("/uploads", express.static("uploads"));
 app.listen(process.env.PORT, () => {
     console.log('Server Runs Successfully on', process.env.PORT)
 })
+
+
 
 
 

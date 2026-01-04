@@ -60,7 +60,7 @@ export const login = async (req, res) => {
         // console.log( String(user?.refId?.password));
         // console.log( String(password));
 
-        if (!isMatch) return res.status(400).json({ message: 'Invalid credentials' });
+        if (!isMatch) return res.status(400).json({ message: 'Password is Incorrect' });
 
         let profile = null
         if (user?.role === "superadmin") {
