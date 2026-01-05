@@ -12,17 +12,10 @@ import assitantRoutes from './routes/assitantRotues.js'
 dotenv.config();
 const app = express();
 dbConnect();
-const allowedOrigins = [
-  "http://192.168.1.39:5173",
-  "http://localhost:5173",
-  "*"
-];
-
 
 app.use(cors({
 
-    origin: allowedOrigins,  // frontend ka address
-    // origin: "https://new-emr-pqlz.onrender.com",  // frontend ka address
+    origin: process.env.Frontend_LINK_DEV,  // frontend ka address
     methods: ["GET", "POST", "PUT", "DELETE"],
     credentials: true
 }));
