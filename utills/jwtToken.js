@@ -52,46 +52,25 @@ export const login = async (req, res) => {
         const password = req.body?.password
 
         if (!email || !password) return res.status(400).json({ message: 'Invalid credentials' })
-        const user = await AuthUserModel.findOne({ email }).populate('refId');
+        const user = await UserModel.findOne({ email })
         if (!user) return res.status(400).json({ message: 'Email Not Found' })
 
-        const isMatch = String(user?.refId?.password) === String(password)
+        const isMatch = String(user?.password) === String(password)
         // console.log(isMatch);
         // console.log( String(user?.refId?.password));
         // console.log( String(password));
 
         if (!isMatch) return res.status(400).json({ message: 'Password is Incorrect' });
 
-        let profile = null
-        if (user?.role === "superadmin") {
-            profile = await UserModel.findById(user?.refId)
-        }
-        else if (user?.role === "admin") {
-            profile = await UserModel.findById(user?.refId)
-        }
-        else if (user?.role === "medicalDirector") {
-            profile = await UserModel.findById(user?.refId)
-        }
-        else if (user?.role === "doctor") {
-            profile = await UserModel.findById(user?.refId)
-        }
-        else if (user?.role === "personalAssitant") {
-            profile = await UserModel.findById(user?.refId)
-        }
-
-        if (!profile) {
-            return res.status(400).json({ message: 'Profile not found' });
-        }
-
         const token = await generateToken({
-            id: profile?._id,
-            name: profile?.name,
+            id: user?._id,
+            name: user?.name,
             email: email,
         })
 
         return res.status(200).json({
             message: 'Login successful',
-            role: profile?.role,  // full profile is sent here
+            role: user?.role,  // full profile is sent here
             token: token
         });
     } catch (error) {
