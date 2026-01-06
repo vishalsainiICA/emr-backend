@@ -5,7 +5,7 @@ import upload from "../middlewares/multer.js";
 
 const app = express.Router()
 
-app.get('/all-illness', getAllIllness)
+app.get('/all-illness-pharma', getAllIllness)
 
 // app.post('create-hosptial', createHospital) 
 app.post('/save-prescribtion', upload.single("prescriptionImage"), savePrescribtion)

@@ -1,11 +1,11 @@
 
-import status from "statuses";
 import IllnessModel from "../models/illnessModel.js";
 import PatientModel from "../models/patientModel.js";
 import PrescribtionModel from "../models/prescribtionModel.js";
 import UserModel from "../models/userModel.js";
 import HospitalModel from "../models/hospital.js";
-import AuthUserModel from "../models/authUserModel.js";
+import Medication from "../models/medicationModel.js"
+import LabtestModel from "../models/labtestModel.js";
 
 
 export const getProfile = async (req, res) => {
@@ -88,9 +88,20 @@ export const todayPatient = async (req, res) => {
 export const getAllIllness = async (req, res) => {
     try {
 
-        const illness = await IllnessModel.find()
+        const [Illness , Mediciene,Labtest] = await Promise.all([
+
+            IllnessModel.find(),
+            Medication.find(),
+            LabtestModel.find(),
+            
+
+        ]) 
         return res.status(200).json({
-            message: 'success', data: illness
+            message: 'success', data: {
+                Illness,
+                Mediciene,
+                Labtest
+            }
         })
     } catch (error) {
         console.error(error);
