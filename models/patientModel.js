@@ -51,7 +51,7 @@ const patientSchema = new mongoose.Schema(
         },
         status: {
             type: String,
-            default: "Scheduled"
+            default: "Assessment Pending"
         },
         phone: {
             type: String, //better than Number (leading zeros safe)

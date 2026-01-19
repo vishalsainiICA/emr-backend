@@ -52,7 +52,7 @@ export const login = async (req, res) => {
         const password = req.body?.password
 
         if (!email || !password) return res.status(400).json({ message: 'Invalid credentials' })
-        const user = await UserModel.findOne({ email })
+        const user = await UserModel.findOne({ email }).populate("assignDoctors")
         if (!user) return res.status(400).json({ message: 'Email Not Found' })
 
         const isMatch = String(user?.password) === String(password)
@@ -70,7 +70,8 @@ export const login = async (req, res) => {
 
         return res.status(200).json({
             message: 'Login successful',
-            role: user?.role,  // full profile is sent here
+            role: user?.role, 
+            profile : user, // full profile is sent here
             token: token
         });
     } catch (error) {

@@ -1,62 +1,84 @@
-import AuthUserModel from "../models/authUserModel.js";
-import InitialAssesment from "../models/initialAssessmentModel.js"
+import InitialAssessment from "../models/initialAssessmentModel.js"
 import PatientModel from "../models/patientModel.js";
 import UserModel from "../models/userModel.js";
 
 
-export const saveInitialAssessments = async (req, res) => {
+export const saveInitialAssessment = async (req, res) => {
+  try {
+    const { patientId, initialAssessment } = req.body;
+    console.log(req.body);
+    
 
-    try {
-
-        const patientId = req?.query?.patientId
-
-        const checkPatient = await PatientModel.findById(patientId)
-
-        if (!checkPatient) {
-            return res.status(404).json({ message: 'patient is not found' })
-        }
-        const patientAssement = await InitialAssesment({
-            patientId: patientId,
-            uid: checkPatient.uid,
-            height: req.body.height,
-            weight: req.body.weight,
-            BP: req.body.BP,
-            bloodGroup: req.body.bloodGroup,
-            o2: req.body.o2,
-            heartRate: req.body.heartRate,
-            sugar: req.body.sugar,
-            hemoglobin: req.body.hemoglobin,
-            bodyTempreture: req.body.bodyTempreture,
-            respiratoryRate: req.body.respiratoryRate,
-            selectedSym: req.body.selectedSym
-
-        });
-        await patientAssement.save();
-        const updatedPatient = await PatientModel.findByIdAndUpdate(patientId, {
-            $set: {
-                initialAssementId: patientAssement._id
-            }
-        }, { new: true })
-        if (updatedPatient) {
-            return res.status(200).json({
-                success: true,
-                message: "Assessment Save Successfully!"
-            })
-        }
-    } catch (error) {
-        console.log('while Initial Assessments', error);
+    if (!patientId || !initialAssessment) {
+      return res.status(400).json({
+        success: false,
+        message: "patientId and initialAssessment are required"
+      });
     }
-}
+
+    const assessment = await InitialAssessment.create({
+      patientId,
+
+      vitals: {
+        bp: initialAssessment?.vitals?.bp || "",
+        heartRate: initialAssessment?.vitals?.heartRate || "",
+        temperature: initialAssessment?.vitals?.temperature || "",
+        respRate: initialAssessment?.vitals?.respRate || "",
+        spo2: initialAssessment?.vitals?.spo2 || "",
+        weight: initialAssessment?.vitals?.weight || "",
+        height: initialAssessment?.vitals?.height || ""
+      },
+
+      complaint: initialAssessment?.complaint || "",
+      medicalHistory: initialAssessment?.medicalHistory || "",
+      physicalExam: initialAssessment?.physicalExam || "",
+      notes: initialAssessment?.notes || "",
+
+      selectedSym: initialAssessment?.selectedSym || [],
+
+      createdBy: req.user?._id
+    });
+
+    const updated = await PatientModel.findByIdAndUpdate(patientId, {
+        $set : {
+            initialAssementId: assessment._id,
+            status:"Assessment Done"
+        }
+    })
+
+    if (updated){
+        return  res.status(200).json({
+      success: true,
+      message: "Initial assessment saved successfully",
+      data: assessment
+    });   
+    }
+
+   return  res.status(201).json({
+      success: true,
+      message: "Initial assessment saved successfully But Not Attach To Patient",
+      data: assessment
+    });
+  } catch (error) {
+    console.error("Save Assessment Error:", error);
+    res.status(500).json({
+      success: false,
+      message: "Server error"
+    });
+  }
+};
+
 
 export const getAllPatientRecords = async (req, res) => {
     try {
+        
         const user = req.user;
         const date = req.query?.date
         const status = req.query?.status
         const profile = await UserModel.findById(user?.id)
         
         let query = {
-            doctorId: profile?.doctorId
+            registerarId: user?.id
         }
         if (date) {
             const selected = new Date(date);
@@ -101,7 +123,7 @@ export const getAllPatientRecords = async (req, res) => {
             .populate('initialAssementId')
 
         res.status(200).json({
-            message: "success",
+            message: "success wha",
             data: TodayPatient,
 
         });

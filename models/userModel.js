@@ -14,7 +14,6 @@ const UserShcema = new mongoose.Schema({
     signatureImage: { type: String, default: null },
     departmentName: { type: String, default: null },
     // doctor Id for personal Assitant creation for any doctor
-    doctorId: { type: mongoose.Schema.Types.ObjectId, ref: "userModel" },
     personalAssitantId: { type: mongoose.Schema.Types.ObjectId, ref: "userModel" },
     hospitalId: { type: mongoose.Schema.Types.ObjectId, ref: "hospital" },
     adminId: { type: mongoose.Schema.Types.ObjectId, ref: "userModel" },
@@ -22,10 +21,19 @@ const UserShcema = new mongoose.Schema({
     totalPrescriptions: { type: Number, default: 0 },
     totalLabTests: { type: Number, default: 0 },
     creationfor: { type: String, default: '' },
+
  role: { type: String, enum: ['superadmin', 'admin', 'medicalDirector', 'doctor', 'personalAssitant'] },
     status: { type: Boolean, default: false },
     image: { type: String, default: '' },
     appointmentFees: { type: Number, default: 0 },
+assignDoctors: {
+  type: [
+    {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "userModel"
+    }
+  ],
+},
     isDeleted: {
         type: Boolean,
         default: false,

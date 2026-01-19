@@ -4,6 +4,7 @@ import HospitalModel from "../models/hospital.js";
 import UserModel from "../models/userModel.js";
 import DepartmentModel from "../models/departmentModel.js";
 import PatientModel from "../models/patientModel.js";
+import IllnessModel from "../models/illnessModel.js";
 
 
 export const addHospital = async (req, res) => {
@@ -463,25 +464,30 @@ export const updateSingleDoctor = async (req, res) => {
 
 export const registerPatient = async (req, res) => {
     console.log(req.body);
+    console.log(req.files);
+
+    const user = req.user
+    console.log(user);
+    
+    const profile = await UserModel.findById(user?.id).populate("hospitalId")
+
+    if(!profile)  return res.status(400).json({
+                message: 'profile not found'
+            }) 
 
     try {
 
-        const { phone, hospitalId } = req.body
+        const { phone} = req.body
         if (phone === '') {
             return res.status(400).json({
                 message: 'please give phone number'
             })
-
-
         }
 
         const [totalDocument, existPhone] = await Promise.all([
-            PatientModel.countDocuments({ hospitalId: hospitalId }),
+            PatientModel.countDocuments({ hospitalId: profile.hospitalId._id}),
             PatientModel.findOne({ phone: phone })
         ]);
-
-        console.log(existPhone);
-
 
         if (existPhone) {
             return res.status(409).json({
@@ -491,12 +497,12 @@ export const registerPatient = async (req, res) => {
         }
 
 
-        const patientUid = `${req.body.name.trim().slice(0, 4).toUpperCase()}${totalDocument}`.trim();
+        const patientUid = `${profile?.hospitalId?.name.trim().slice(0, 3).toUpperCase()}-${totalDocument}`.trim();
         const categories = req.body.categories;
         const counts = req.body.fileCount;
         const files = req.files?.documents;
-        const addharfrontPath = req.files?.addharfront[0].path.replace(/\\/g, "/")
-        const addharbackPath = req.files?.addharback[0].path.replace(/\\/g, "/")
+        // const addharfrontPath = req.files?.addharfront[0].path.replace(/\\/g, "/")
+        // const addharbackPath = req.files?.addharback[0].path.replace(/\\/g, "/")
 
         let finalData = []
         let index = 0;
@@ -521,13 +527,12 @@ export const registerPatient = async (req, res) => {
 
         const object = {
             doctorId: req.body.doctorId,
-            hospitalId: req.body?.hospitalId || null,
+            hospitalId: profile.hospitalId?._id || null,
             uid: patientUid.trim(),
             name: req.body?.name,
             gender: req.body?.gender,
             phone: req.body?.phone,
             email: req.body?.email,
-            DOB: req.body?.DOB,
             nationality: req.body?.nationality,
             whatsApp: req.body?.whatsApp,
             permanentAddress: req.body?.permanentAddress,
@@ -539,21 +544,18 @@ export const registerPatient = async (req, res) => {
             specialty: req.body?.specialty,
             city: req.body?.city,
             state: req.body?.state,
-            registerarId: req.body?.registerarId,
-
-            addharDocumnets: {
-                addharfrontPath,
-                addharbackPath
-            },
+            registerarId: profile?._id,
+            // addharDocumnets: {
+            //     addharfrontPath,
+            //     addharbackPath
+            // },
             age: req.body?.age,
             pastDocuments: finalData
-
-
         };
         const newPatient = new PatientModel(object);
         await newPatient.save();
 
-        const result = await HospitalModel.findByIdAndUpdate(hospitalId, {
+        const result = await HospitalModel.findByIdAndUpdate(profile.hospitalId?._id, {
             $inc: {
                 totalPatient: 1
             }
@@ -845,5 +847,16 @@ export const validateMobileNo = async (req, res) => {
     }
 }
 
+export const getAllIllness = async (req, res) => {
+
+    try {
+        const illness = await IllnessModel.find()
+       res.status(200).json({ message: "Success"  , data : illness});
+    } catch (error) {
+        console.log(error)
+        return res.status(500).json({ message: "Internal Server Error" });
+
+    }
+}
 
 

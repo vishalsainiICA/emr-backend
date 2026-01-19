@@ -29,12 +29,12 @@ app.use(express.json());
 // All Threads is completed for this timeframe15m
 // INFO:app.logger:[15m] Processed strategies.
 
-app.use('/api/super-admin', superAdminRoutes)
-app.use('/api/admin', adminRoutes)
-app.use('/api/medical-director', medicalDirectorRoutes)
-app.use('/api/doctor', doctorRoutes)
-app.use('/api/assitant', assitantRoutes)
-app.use('/api/common', commonRoutes)
+app.use('/super-admin', superAdminRoutes)
+app.use('/admin', adminRoutes)
+app.use('/medical-director', medicalDirectorRoutes)
+app.use('/doctor', doctorRoutes)
+app.use('/assitant', assitantRoutes)
+app.use('/common', commonRoutes)
 
 // to handel same login sytem with diffrent user 
 app.post('/api/login', login)
