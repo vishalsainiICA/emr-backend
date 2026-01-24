@@ -8,7 +8,7 @@ const app = express.Router()
 app.get('/all-illness-pharma', getAllIllness)
 
 // app.post('create-hosptial', createHospital) 
-app.post('/save-prescribtion', upload.single("prescriptionImage"), savePrescribtion)
+app.post('/save-prescribtion', verifyToken, upload.single("prescriptionImage"), savePrescribtion)
 app.get('/auth/profile', verifyToken, getProfile)
 app.post('/auth/verfiyPin', verifyToken, verifyPin)
 app.put('/auth/edit-profile', upload.none(), verifyToken, editProfile)

@@ -4,81 +4,83 @@ import UserModel from "../models/userModel.js";
 
 
 export const saveInitialAssessment = async (req, res) => {
-  try {
-    const { patientId, initialAssessment } = req.body;
-    console.log(req.body);
-    
+    try {
+        const { patientId, initialAssessment } = req.body;
+        console.log(req.body);
 
-    if (!patientId || !initialAssessment) {
-      return res.status(400).json({
-        success: false,
-        message: "patientId and initialAssessment are required"
-      });
-    }
 
-    const assessment = await InitialAssessment.create({
-      patientId,
-
-      vitals: {
-        bp: initialAssessment?.vitals?.bp || "",
-        heartRate: initialAssessment?.vitals?.heartRate || "",
-        temperature: initialAssessment?.vitals?.temperature || "",
-        respRate: initialAssessment?.vitals?.respRate || "",
-        spo2: initialAssessment?.vitals?.spo2 || "",
-        weight: initialAssessment?.vitals?.weight || "",
-        height: initialAssessment?.vitals?.height || ""
-      },
-
-      complaint: initialAssessment?.complaint || "",
-      medicalHistory: initialAssessment?.medicalHistory || "",
-      physicalExam: initialAssessment?.physicalExam || "",
-      notes: initialAssessment?.notes || "",
-
-      selectedSym: initialAssessment?.selectedSym || [],
-
-      createdBy: req.user?._id
-    });
-
-    const updated = await PatientModel.findByIdAndUpdate(patientId, {
-        $set : {
-            initialAssementId: assessment._id,
-            status:"Assessment Done"
+        if (!patientId || !initialAssessment) {
+            return res.status(400).json({
+                success: false,
+                message: "patientId and initialAssessment are required"
+            });
         }
-    })
 
-    if (updated){
-        return  res.status(200).json({
-      success: true,
-      message: "Initial assessment saved successfully",
-      data: assessment
-    });   
+        const assessment = await InitialAssessment.create({
+            patientId,
+
+            vitals: {
+                bp: initialAssessment?.vitals?.bp || "",
+                heartRate: initialAssessment?.vitals?.heartRate || "",
+                temperature: initialAssessment?.vitals?.temperature || "",
+                respRate: initialAssessment?.vitals?.respRate || "",
+                spo2: initialAssessment?.vitals?.spo2 || "",
+                weight: initialAssessment?.vitals?.weight || "",
+                height: initialAssessment?.vitals?.height || ""
+            },
+
+            complaint: initialAssessment?.complaint || "",
+            medicalHistory: initialAssessment?.medicalHistory || "",
+            physicalExam: initialAssessment?.physicalExam || "",
+            notes: initialAssessment?.notes || "",
+
+            selectedSym: initialAssessment?.selectedSym || [],
+
+            createdBy: req.user?._id
+        });
+
+        const updated = await PatientModel.findByIdAndUpdate(patientId, {
+            $set: {
+                initialAssementId: assessment._id,
+                status: "Assessment Done"
+            }
+        })
+
+        if (updated) {
+            return res.status(200).json({
+                success: true,
+                message: "Initial assessment saved successfully",
+                data: assessment
+            });
+        }
+
+        return res.status(201).json({
+            success: true,
+            message: "Initial assessment saved successfully But Not Attach To Patient",
+            data: assessment
+        });
+    } catch (error) {
+        console.error("Save Assessment Error:", error);
+        res.status(500).json({
+            success: false,
+            message: "Server error"
+        });
     }
-
-   return  res.status(201).json({
-      success: true,
-      message: "Initial assessment saved successfully But Not Attach To Patient",
-      data: assessment
-    });
-  } catch (error) {
-    console.error("Save Assessment Error:", error);
-    res.status(500).json({
-      success: false,
-      message: "Server error"
-    });
-  }
 };
 
 
-export const getAllPatientRecords = async (req, res) => {
+export const getWitNoAssessmentPatient = async (req, res) => {
     try {
-        
+
         const user = req.user;
         const date = req.query?.date
         const status = req.query?.status
-        const profile = await UserModel.findById(user?.id)
-        
+        console.log(user);
+
         let query = {
-            registerarId: user?.id
+            registerarId: user?.id,
+
+
         }
         if (date) {
             const selected = new Date(date);
@@ -107,7 +109,48 @@ export const getAllPatientRecords = async (req, res) => {
         }
 
 
-        else {
+        // else {
+        //     const startOfDay = new Date();
+        //     startOfDay.setHours(0, 0, 0, 0);
+
+        //     const endOfDay = new Date();
+        //     endOfDay.setHours(23, 59, 59, 999);
+        //     query.updatedAt = { $gte: startOfDay, $lte: endOfDay }
+        // }
+        const TodayPatient = await PatientModel.find(query).populate("initialAssementId")
+            .sort({ updatedAt: -1 }) // latest first
+
+        return res.status(200).json({
+            message: "success",
+            data: TodayPatient,
+
+        });
+
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ message: "Error fetching patients" });
+    }
+};
+export const getAllPatientRecords = async (req, res) => {
+    try {
+
+        const user = req.user;
+        const date = req.query?.date
+        const status = req.query?.status
+        let query = {
+            registerarId: user?.id,
+            currentPrescriptionId: { $ne: null }
+
+        }
+        if (date) {
+            const selected = new Date(date);
+            const start = selected.setHours(0, 0, 0, 0);
+            const end = selected.setHours(23, 59, 59, 999)
+            query.updatedAt = { $gte: start, $lte: end }
+        }
+
+        else if (status == "today") {
+
             const startOfDay = new Date();
             startOfDay.setHours(0, 0, 0, 0);
 
@@ -115,15 +158,35 @@ export const getAllPatientRecords = async (req, res) => {
             endOfDay.setHours(23, 59, 59, 999);
             query.updatedAt = { $gte: startOfDay, $lte: endOfDay }
         }
+        else if (status === "postponed") {
+            query.status = "Postponed"
+        }
+        else if (status === "cancel") {
+            query.status = "Cancel"
+        }
 
-        console.log("queet", query);
+        else if (status === "all") {
+        }
 
-        const TodayPatient = await PatientModel.find(query)
+
+        // else {
+        //     const startOfDay = new Date();
+        //     startOfDay.setHours(0, 0, 0, 0);
+
+        //     const endOfDay = new Date();
+        //     endOfDay.setHours(23, 59, 59, 999);
+        //     query.updatedAt = { $gte: startOfDay, $lte: endOfDay }
+        // }
+        const TodayPatient = await PatientModel.find(query).populate("initialAssementId currentPrescriptionId")
             .sort({ updatedAt: -1 }) // latest first
-            .populate('initialAssementId')
+            .populate({
+                path: "treatmentHistory",
+                populate: "doctorId"
 
-        res.status(200).json({
-            message: "success wha",
+            })
+
+        return res.status(200).json({
+            message: "success",
             data: TodayPatient,
 
         });

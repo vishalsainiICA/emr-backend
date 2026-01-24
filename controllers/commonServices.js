@@ -463,30 +463,37 @@ export const updateSingleDoctor = async (req, res) => {
 
 
 export const registerPatient = async (req, res) => {
-    console.log(req.body);
-    console.log(req.files);
-
-    const user = req.user
-    console.log(user);
-    
-    const profile = await UserModel.findById(user?.id).populate("hospitalId")
-
-    if(!profile)  return res.status(400).json({
-                message: 'profile not found'
-            }) 
-
     try {
+        const user = req.user;
 
-        const { phone} = req.body
-        if (phone === '') {
+        const profile = await UserModel
+            .findById(user?.id)
+            .populate("hospitalId");
+
+        if (!profile || !profile.hospitalId) {
             return res.status(400).json({
-                message: 'please give phone number'
-            })
+                success: false,
+                message: "Profile or Hospital not found"
+            });
         }
 
-        const [totalDocument, existPhone] = await Promise.all([
-            PatientModel.countDocuments({ hospitalId: profile.hospitalId._id}),
-            PatientModel.findOne({ phone: phone })
+        const { contact, doctorId } = req.body;
+
+        if (!contact) {
+            return res.status(400).json({
+                success: false,
+                message: "Please give phone number"
+            });
+        }
+
+        /*Check existing patient (hospital-wise) */
+        const [totalPatients, existPhone] = await Promise.all([
+            PatientModel.countDocuments({ hospitalId: profile.hospitalId._id }),
+            PatientModel.findOne({
+                phone: contact,
+                hospitalId: profile.hospitalId._id,
+                isDeleted: false
+            })
         ]);
 
         if (existPhone) {
@@ -496,27 +503,32 @@ export const registerPatient = async (req, res) => {
             });
         }
 
+        /*UID generation */
+        const patientUid = `${profile.hospitalId.name
+            .trim()
+            .slice(0, 3)
+            .toUpperCase()}-${totalPatients + 1}`;
 
-        const patientUid = `${profile?.hospitalId?.name.trim().slice(0, 3).toUpperCase()}-${totalDocument}`.trim();
-        const categories = req.body.categories;
-        const counts = req.body.fileCount;
-        const files = req.files?.documents;
-        // const addharfrontPath = req.files?.addharfront[0].path.replace(/\\/g, "/")
-        // const addharbackPath = req.files?.addharback[0].path.replace(/\\/g, "/")
+        /*Past documents handling */
+        const categories = req.body.categories || [];
+        const counts = req.body.fileCount || [];
+        const files = req.files?.documents || [];
 
-        let finalData = []
+        let finalData = [];
         let index = 0;
-        for (let i = 0; i < categories?.length; i++) {
+
+        for (let i = 0; i < categories.length; i++) {
             const category = categories[i];
-            const count = parseInt(counts[i]);
+            const count = parseInt(counts[i] || 0);
 
             let catFiles = [];
-
             for (let j = 0; j < count; j++) {
-                catFiles.push({
-                    path: files[index].path.replace(/\\/g, "/"),
-                });
-                index++;
+                if (files[index]) {
+                    catFiles.push({
+                        path: files[index].path.replace(/\\/g, "/")
+                    });
+                    index++;
+                }
             }
 
             finalData.push({
@@ -525,60 +537,54 @@ export const registerPatient = async (req, res) => {
             });
         }
 
-        const object = {
-            doctorId: req.body.doctorId,
-            hospitalId: profile.hospitalId?._id || null,
-            uid: patientUid.trim(),
+        /* Patient Object */
+        const patientObject = {
+            uid: patientUid,
+            hospitalId: profile.hospitalId._id,
+            registerarId: profile._id,
+
             name: req.body?.name,
             gender: req.body?.gender,
-            phone: req.body?.phone,
+            phone: contact,
             email: req.body?.email,
             nationality: req.body?.nationality,
             whatsApp: req.body?.whatsApp,
+
             permanentAddress: req.body?.permanentAddress,
             currentAddress: req.body?.currentAddress,
-            patientCategory: req.body?.patientCategory ? JSON.parse(req.body?.patientCategory) : null,
+
+            patientCategory: req.body?.patientCategory
+                ? JSON.parse(req.body.patientCategory)
+                : null,
+
             attendeeName: req.body?.attendeeName,
             attendeePhone: req.body?.attendeePhone,
             attendeeRelation: req.body?.attendeeRelation,
-            specialty: req.body?.specialty,
+
             city: req.body?.city,
             state: req.body?.state,
-            registerarId: profile?._id,
-            // addharDocumnets: {
-            //     addharfrontPath,
-            //     addharbackPath
-            // },
             age: req.body?.age,
-            pastDocuments: finalData
+
+            pastDocuments: finalData,
+
+            /* CURRENT TREATMENT */
+            currentDoctorId: doctorId || null,
         };
-        const newPatient = new PatientModel(object);
-        await newPatient.save();
 
-        const result = await HospitalModel.findByIdAndUpdate(profile.hospitalId?._id, {
-            $inc: {
-                totalPatient: 1
-            }
-        }, {
-            new: true
-        })
-        console.log(result);
+        const newPatient = await PatientModel.create(patientObject);
 
-        if (result) {
-            return res.status(200).json({
-                success: true,
-                message: "User Registered Successfully",
-                data: newPatient
-            });
-        }
+        /* Update hospital patient count */
+        await HospitalModel.findByIdAndUpdate(
+            profile.hospitalId._id,
+            { $inc: { totalPatient: 1 } },
+            { new: true }
+        );
 
-        else {
-            return res.status(300).json({
-                success: true,
-                message: "Patient Registered Successfully But Not Updated in Hospital in Document",
-                data: newPatient
-            });
-        }
+        return res.status(201).json({
+            success: true,
+            message: "Patient Registered Successfully",
+            data: newPatient
+        });
 
     } catch (error) {
         console.error("Error while Registering Patient:", error);
@@ -589,6 +595,7 @@ export const registerPatient = async (req, res) => {
         });
     }
 };
+
 
 
 export const patientsByHospitalById = async (req, res) => {
@@ -636,7 +643,7 @@ export const addPersonalAssitant = async (req, res) => {
             gender: gender,
             hospitalId: hosId,
             doctorId: docId,
-               role: 'personalAssitant',
+            role: 'personalAssitant',
         })
 
         const updated = await UserModel.findByIdAndUpdate(docId, {
@@ -682,7 +689,7 @@ export const changePatientStatus = async (req, res) => {
         let updateFields = {};
 
         console.log(req.body);
-        
+
 
         if (newDate && type) {
             updateFields.updatedAt = new Date(newDate);  // Always convert to JS Date
@@ -788,15 +795,15 @@ export const updateProfile = async (req, res) => {
     try {
 
         const docId = req.body._id;
- 
-        
+
+
         if (!docId) return res.status(404).json({ message: "docId is required" });
 
         const updated = await UserModel.findByIdAndUpdate(docId, req.body, {
             new: true
         })
-      
-        
+
+
 
         if (updated) return res.status(200).json({ message: "Success", data: updated });
         else return res.status(404).json({ message: "doctor  Not Found" });
@@ -851,7 +858,7 @@ export const getAllIllness = async (req, res) => {
 
     try {
         const illness = await IllnessModel.find()
-       res.status(200).json({ message: "Success"  , data : illness});
+        res.status(200).json({ message: "Success", data: illness });
     } catch (error) {
         console.log(error)
         return res.status(500).json({ message: "Internal Server Error" });

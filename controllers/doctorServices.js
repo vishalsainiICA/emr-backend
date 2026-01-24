@@ -65,12 +65,12 @@ export const todayPatient = async (req, res) => {
         endOfDay.setHours(23, 59, 59, 999);
 
         const [doctorProfile, todayPatient] = await Promise.all([
-            UserModel.findById(doctorId).populate('hospitalId'),
+            UserModel.findById(doctorId).populate('hospitalId registerarId'),
             PatientModel.find({
                 updatedAt: { $gte: startOfDay, $lte: endOfDay },
                 initialAssementId: { $ne: null }
 
-            }).populate('initialAssementId'),
+            }).populate('initialAssementId registerarId'),
         ]);
 
         return res.status(200).json({
@@ -88,14 +88,14 @@ export const todayPatient = async (req, res) => {
 export const getAllIllness = async (req, res) => {
     try {
 
-        const [Illness , Mediciene,Labtest] = await Promise.all([
+        const [Illness, Mediciene, Labtest] = await Promise.all([
 
             IllnessModel.find(),
             Medication.find(),
             LabtestModel.find(),
-            
 
-        ]) 
+
+        ])
         return res.status(200).json({
             message: 'success', data: {
                 Illness,
@@ -141,14 +141,6 @@ export const getAllPatientRecords = async (req, res) => {
             // date wale filter me initial assessment required
             query.initialAssementId = { $ne: null };
         }
-
-        // 🔹 2) STATUS = TODAY
-        else if (status === "today") {
-
-            query.updatedAt = { $gte: start, $lte: end };
-            query.initialAssementId = { $ne: null };
-        }
-
         // 🔹 3) STATUS = POSTPONED
         else if (status === "postponed") {
             query.status = "Postponed";
@@ -161,71 +153,57 @@ export const getAllPatientRecords = async (req, res) => {
 
         // 🔹 5) STATUS = ALL → no extra filter
         else if (status === "all") { }
+        //         const [
+        //     TodayPatient,
+        //     TodayPatients,
+        //     TotalMalepatient,
+        //     TotalFemalepatient,
+        //     TotalPrescrition,
+        //     CancelPatient
+        // ] = await Promise.all([
 
-        // 🔹 6) DEFAULT → TODAY
-        else {
-            const start = new Date();
-            start.setHours(0, 0, 0, 0);
+        //     PatientModel.find(query)
+        //         .sort({ updatedAt: -1 })
+        //         .populate('prescribtionId')
+        //         .populate("initialAssementId"),
 
-            const end = new Date();
-            end.setHours(23, 59, 59, 999);
+        //     PatientModel.countDocuments({
+        //         updatedAt: { $gte: start, $lte: end },
+        //         initialAssementId: { $ne: null }
+        //     }),
+        //     PatientModel.countDocuments({
+        //         isDeleted: false,
+        //         doctorId: user?.id,
+        //         gender: { $regex: "^male$", $options: "i" }
+        //     }),
 
-            query.updatedAt = { $gte: start, $lte: end };
-            query.initialAssementId = { $ne: null };
-        }
+        //     PatientModel.countDocuments({
+        //         isDeleted: false,
 
-        const [
-            TodayPatient,
-            TodayPatients,
-            TotalMalepatient,
-            TotalFemalepatient,
-            TotalPrescrition,
-            CancelPatient
-        ] = await Promise.all([
+        //         doctorId: user?.id,
+        //         gender: { $regex: "^female$", $options: "i" }
+        //     }),
 
-            PatientModel.find(query)
-                .sort({ updatedAt: -1 })
-                .populate('prescribtionId')
-                .populate("initialAssementId"),
+        //     PatientModel.countDocuments({
+        //         doctorId: user?.id,
+        //         prescribtionId: { $ne: null }
+        //     }),
 
-            PatientModel.countDocuments({
-                updatedAt: { $gte: start, $lte: end },
-                initialAssementId: { $ne: null }
-            }),
-            PatientModel.countDocuments({
-                isDeleted: false,
-                doctorId: user?.id,
-                gender: { $regex: "^male$", $options: "i" }
-            }),
+        //     PatientModel.countDocuments({
+        //         doctorId: user?.id,
+        //         status: "Cancel"
+        //     })
+        // ]);
 
-            PatientModel.countDocuments({
-                isDeleted: false,
-
-                doctorId: user?.id,
-                gender: { $regex: "^female$", $options: "i" }
-            }),
-
-            PatientModel.countDocuments({
-                doctorId: user?.id,
-                prescribtionId: { $ne: null }
-            }),
-
-            PatientModel.countDocuments({
-                doctorId: user?.id,
-                status: "Cancel"
+        const patients = await PatientModel.find({ currentDoctorId: user.id, currentPrescriptionId: { $ne: null } }).populate("initialAssementId currentPrescriptionId")
+            .populate({
+                path: "treatmentHistory",
+                populate: "doctorId",
             })
-        ]);
-
-        res.status(200).json({
+        return res.status(200).json({
             message: "success",
-            data: TodayPatient,
-            metrices: {
-                TodayPatient: TodayPatients,
-                TotalMalepatient,
-                TotalFemalepatient,
-                TotalPrescrition,
-                CancelPatient,
-            }
+            data: patients,
+
         });
 
     } catch (error) {
@@ -235,39 +213,57 @@ export const getAllPatientRecords = async (req, res) => {
 };
 
 export const savePrescribtion = async (req, res) => {
+    console.log(req.body);
+
     try {
-        const {
+        let {
             hospitalId,
             patientId,
-            doctorId,
             initialAssementId,
             prescriptionType,
             prescriptionMediciene,
             illness,
             symptoms,
             labTest,
+        } = req.body;
 
-        } = req.body
-        if (!hospitalId || !patientId || !doctorId) {
+        /* Required fields */
+        if (!hospitalId || !patientId) {
             return res.status(400).json({
-                message: "Required fields missing: hospitalId, patientId, doctorId"
+                success: false,
+                message: "Required fields missing: hospitalId, patientId, doctorId",
             });
         }
 
-        // check file upload
+        /*Parse labTest (FormData case) */
+        if (typeof labTest === "string") {
+            try {
+                labTest = JSON.parse(labTest);
+            } catch {
+                labTest = [];
+            }
+        }
+
+        const doctorId = req.user.id
+
+        /*Prescription image */
         const prescriptionImage = req.file?.path
             ? req.file.path.replace(/\\/g, "/")
             : null;
 
+        /* Doctor fee */
         const doctorProfile = await UserModel.findById(doctorId);
         if (!doctorProfile) {
-            return res.status(404).json({ message: "Doctor not found" });
+            return res.status(404).json({
+                success: false,
+                message: "Doctor not found",
+            });
         }
 
         const doctorFee = doctorProfile.appointmentFees || 0;
 
-        // payload object
-        const obj = {
+        /*Prescription payload */
+        const payload = {
             patientId,
             initialAssementId,
             doctorId,
@@ -278,48 +274,73 @@ export const savePrescribtion = async (req, res) => {
             symptoms,
             labTest,
             prescriptionfees: doctorFee,
-            prescriptionImage
+            prescriptionImage,
         };
 
-        // 1. Create prescription
-        const prescription = await PrescribtionModel.create(obj);
+        /*1. Create prescription */
+        const prescription = await PrescribtionModel.create(payload);
 
-        // 2. Update patient
+        /*2. Update patient (CURRENT + HISTORY) */
         const updatedPatient = await PatientModel.findByIdAndUpdate(
             patientId,
-            { $set: { prescribtionId: prescription._id } },
-            { new: true }
-        );
-
-        if (!updatedPatient) {
-            return res.status(400).json({ message: "Patient update failed" });
-        }
-
-        // 3. Update hospital stats in one go
-        const hosptial = await HospitalModel.findByIdAndUpdate(
-            hospitalId,
             {
-                $inc: {
-                    totalPrescribtion: 1,
-                    totalRevenue: Number(doctorFee) || 0
+                currentDoctorId: doctorId,
+                currentPrescriptionId: prescription._id,
+                isPrescbribedDone: true,
+                status: "Prescribed",
+
+                $push: {
+                    treatmentHistory: {
+                        doctorId,
+                        initialAssementId: initialAssementId,
+                        prescriptionId: prescription._id,
+                        diagnosis: illness,
+                        notes: symptoms,
+                        status: "Prescribed",
+                        treatedAt: new Date()
+                    }
                 }
             },
             { new: true }
         );
 
-        console.log(hosptial);
 
+        if (!updatedPatient) {
+            return res.status(400).json({
+                success: false,
+                message: "Patient update failed",
+            });
+        }
+
+        /*3. Update hospital stats */
+        await HospitalModel.findByIdAndUpdate(
+            hospitalId,
+            {
+                $inc: {
+                    totalPrescribtion: 1,
+                    totalRevenue: Number(doctorFee),
+                },
+            },
+            { new: true }
+        );
 
         return res.status(200).json({
-            message: "Success",
-            data: updatedPatient
+            success: true,
+            message: "Prescription saved successfully",
+            data: prescription,
         });
 
     } catch (error) {
         console.error("savePrescribtion Error:", error);
-        return res.status(500).json({ message: "Internal Server Error" });
+        return res.status(500).json({
+            success: false,
+            message: "Internal Server Error",
+            error: error.message,
+        });
     }
 };
+
+
 export const verifyPin = async (req, res) => {
     try {
         const { tpin } = req.body;

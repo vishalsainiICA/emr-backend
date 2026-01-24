@@ -32,15 +32,15 @@ const prescribtionShehma = mongoose.Schema({
 
 
     illness: {
-        type: Array,
+        type: String,
         default: null
     },
     symptoms: {
-        type: Array,
+        type: String,
         default: null
     },
     prescriptionMediciene: {
-        type: Array,
+        type: String,
         default: null
     },
 
@@ -52,17 +52,10 @@ const prescribtionShehma = mongoose.Schema({
         type: String,
         default: null
     },
-    followUp: {
-        type: Array,
-        default: null
-    },
     isDeleted: {
         type: Boolean,
         default: false,
     },
-
-
-
 }, {
     timestamps: true
 })
