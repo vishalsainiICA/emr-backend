@@ -32,9 +32,9 @@ app.put('/change-status', changePatientStatus)
 
 
 // patient
-app.post('/patient/register-patient',verifyToken ,upload.fields([{ name: 'documents' },
-// { name: "addharfront" },
-// { name: "addharback" }
+app.post('/patient/register-patient', verifyToken, upload.fields([{ name: 'documents' },
+{ name: "aadhaarFront" },
+{ name: "aadhaarBack" }
 
 ]), registerPatient)
 app.post('/patient/validate-mobile', validateMobileNo);

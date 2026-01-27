@@ -57,7 +57,7 @@ export const editProfile = async (req, res) => {
 
 export const todayPatient = async (req, res) => {
     try {
-        const doctorId = "69087f721f9b6973874b8dd1" || req.user.id; // make sure req.user is set
+        const doctorId = req.user.id; // make sure req.user is set
         const startOfDay = new Date();
         startOfDay.setHours(0, 0, 0, 0);
 
@@ -68,7 +68,8 @@ export const todayPatient = async (req, res) => {
             UserModel.findById(doctorId).populate('hospitalId registerarId'),
             PatientModel.find({
                 updatedAt: { $gte: startOfDay, $lte: endOfDay },
-                initialAssementId: { $ne: null }
+                initialAssementId: { $ne: null },
+                currentPrescriptionId: { $ne: null },
 
             }).populate('initialAssementId registerarId'),
         ]);
@@ -199,6 +200,7 @@ export const getAllPatientRecords = async (req, res) => {
             .populate({
                 path: "treatmentHistory",
                 populate: "doctorId",
+                populate: "prescriptionId"
             })
         return res.status(200).json({
             message: "success",

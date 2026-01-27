@@ -537,6 +537,20 @@ export const registerPatient = async (req, res) => {
             });
         }
 
+        const aadhaarFrontFile = req.files?.aadhaarFront?.[0];
+        const aadhaarBackFile = req.files?.aadhaarBack?.[0];
+
+        const aadhaarData = {
+            addharfrontPath: aadhaarFrontFile
+                ? aadhaarFrontFile.path.replace(/\\/g, "/")
+                : null,
+
+            addharbackPath: aadhaarBackFile
+                ? aadhaarBackFile.path.replace(/\\/g, "/")
+                : null
+        };
+
+
         /* Patient Object */
         const patientObject = {
             uid: patientUid,
@@ -564,6 +578,8 @@ export const registerPatient = async (req, res) => {
             city: req.body?.city,
             state: req.body?.state,
             age: req.body?.age,
+
+            addharDocumnets: aadhaarData,
 
             pastDocuments: finalData,
 

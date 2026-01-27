@@ -118,7 +118,23 @@ export const getWitNoAssessmentPatient = async (req, res) => {
         //     query.updatedAt = { $gte: startOfDay, $lte: endOfDay }
         // }
         const TodayPatient = await PatientModel.find(query).populate("initialAssementId")
-            .sort({ updatedAt: -1 }) // latest first
+            .populate({
+                path: "treatmentHistory",
+                populate: [
+                    {
+                        path: "doctorId",
+                        model: "userModel"
+                    },
+                    {
+                        path: "prescriptionId",
+                        model: "prescribtion"
+                    },
+                    {
+                        path: "initialAssementId",
+                        model: "initialassessment"
+                    }
+                ]
+            }).sort({ updatedAt: -1 }) // latest first
 
         return res.status(200).json({
             message: "success",
@@ -133,62 +149,59 @@ export const getWitNoAssessmentPatient = async (req, res) => {
 };
 export const getAllPatientRecords = async (req, res) => {
     try {
-
         const user = req.user;
-        const date = req.query?.date
-        const status = req.query?.status
+        const { startDate, endDate, status } = req.query;
+
         let query = {
             registerarId: user?.id,
             currentPrescriptionId: { $ne: null }
+        };
 
+        //  Date range filter
+        if (startDate && endDate) {
+            const start = new Date(startDate);
+            start.setHours(0, 0, 0, 0);
+
+            const end = new Date(endDate);
+            end.setHours(23, 59, 59, 999);
+
+            query.updatedAt = { $gte: start, $lte: end };
         }
-        if (date) {
-            const selected = new Date(date);
-            const start = selected.setHours(0, 0, 0, 0);
-            const end = selected.setHours(23, 59, 59, 999)
-            query.updatedAt = { $gte: start, $lte: end }
-        }
 
-        else if (status == "today") {
-
+        // Status filters
+        if (status === "today") {
             const startOfDay = new Date();
             startOfDay.setHours(0, 0, 0, 0);
 
             const endOfDay = new Date();
             endOfDay.setHours(23, 59, 59, 999);
-            query.updatedAt = { $gte: startOfDay, $lte: endOfDay }
-        }
-        else if (status === "postponed") {
-            query.status = "Postponed"
-        }
-        else if (status === "cancel") {
-            query.status = "Cancel"
+
+            query.updatedAt = { $gte: startOfDay, $lte: endOfDay };
         }
 
-        else if (status === "all") {
+        if (status === "postponed") {
+            query.status = "Postponed";
         }
 
+        if (status === "cancel") {
+            query.status = "Cancel";
+        }
 
-        // else {
-        //     const startOfDay = new Date();
-        //     startOfDay.setHours(0, 0, 0, 0);
-
-        //     const endOfDay = new Date();
-        //     endOfDay.setHours(23, 59, 59, 999);
-        //     query.updatedAt = { $gte: startOfDay, $lte: endOfDay }
-        // }
-        const TodayPatient = await PatientModel.find(query).populate("initialAssementId currentPrescriptionId")
-            .sort({ updatedAt: -1 }) // latest first
+        const patients = await PatientModel.find(query)
+            .populate("initialAssementId currentPrescriptionId")
             .populate({
                 path: "treatmentHistory",
-                populate: "doctorId"
-
+                populate: [
+                    { path: "doctorId", model: "userModel" },
+                    { path: "prescriptionId", model: "prescribtion" },
+                    { path: "initialAssementId", model: "initialassessment" }
+                ]
             })
+            .sort({ updatedAt: -1 });
 
         return res.status(200).json({
             message: "success",
-            data: TodayPatient,
-
+            data: patients
         });
 
     } catch (error) {
@@ -196,6 +209,7 @@ export const getAllPatientRecords = async (req, res) => {
         res.status(500).json({ message: "Error fetching patients" });
     }
 };
+
 
 export const getProfile = async (req, res) => {
     console.log(req.user);
