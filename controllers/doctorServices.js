@@ -69,9 +69,9 @@ export const todayPatient = async (req, res) => {
             PatientModel.find({
                 updatedAt: { $gte: startOfDay, $lte: endOfDay },
                 initialAssementId: { $ne: null },
-                currentPrescriptionId: { $ne: null },
+                currentPrescriptionId: { $eq: null },
 
-            }).populate('initialAssementId'),
+            }).populate('initialAssementId').limit(5),
         ]);
 
         return res.status(200).json({
@@ -114,11 +114,13 @@ export const getAllPatientRecords = async (req, res) => {
     try {
 
         const user = req.user;
-        const date = req.query?.date;
-        const status = req.query?.status;
+        const { startDate, endDate, status } = req.query;
+
+        console.log(req.query);
+
 
         let query = {
-            doctorId: user?.id
+            currentDoctorId: user.id, currentPrescriptionId: { $ne: null }
         };
 
         const start = new Date();
@@ -128,19 +130,15 @@ export const getAllPatientRecords = async (req, res) => {
         end.setHours(23, 59, 59, 999);
 
         // 🔹 1) If DATE given → always apply DATE filter
-        if (date) {
-            const selected = new Date(date);
-
-            const start = new Date(selected);
+        //  Date range filter
+        if (startDate && endDate) {
+            const start = new Date(startDate);
             start.setHours(0, 0, 0, 0);
 
-            const end = new Date(selected);
+            const end = new Date(endDate);
             end.setHours(23, 59, 59, 999);
 
             query.updatedAt = { $gte: start, $lte: end };
-
-            // date wale filter me initial assessment required
-            query.initialAssementId = { $ne: null };
         }
         // 🔹 3) STATUS = POSTPONED
         else if (status === "postponed") {
@@ -196,12 +194,13 @@ export const getAllPatientRecords = async (req, res) => {
         //     })
         // ]);
 
-        const patients = await PatientModel.find({ currentDoctorId: user.id, currentPrescriptionId: { $ne: null } }).populate("initialAssementId currentPrescriptionId")
+        const patients = await PatientModel.find(query).populate("initialAssementId currentPrescriptionId")
             .populate({
                 path: "treatmentHistory",
                 populate: "doctorId",
                 populate: "prescriptionId"
             })
+
         return res.status(200).json({
             message: "success",
             data: patients,
