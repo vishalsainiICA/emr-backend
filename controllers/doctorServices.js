@@ -65,13 +65,13 @@ export const todayPatient = async (req, res) => {
         endOfDay.setHours(23, 59, 59, 999);
 
         const [doctorProfile, todayPatient] = await Promise.all([
-            UserModel.findById(doctorId).populate('hospitalId registerarId'),
+            UserModel.findById(doctorId).populate('hospitalId'),
             PatientModel.find({
                 updatedAt: { $gte: startOfDay, $lte: endOfDay },
                 initialAssementId: { $ne: null },
                 currentPrescriptionId: { $ne: null },
 
-            }).populate('initialAssementId registerarId'),
+            }).populate('initialAssementId'),
         ]);
 
         return res.status(200).json({
