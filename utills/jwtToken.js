@@ -34,6 +34,8 @@ export const verifyToken = (req, res, next) => {
                     message: "Invalid Token or Expired",
                 });
             }
+            console.log(decoded);
+
             req.user = decoded;
             next();
         });
@@ -70,8 +72,8 @@ export const login = async (req, res) => {
 
         return res.status(200).json({
             message: 'Login successful',
-            role: user?.role, 
-            profile : user, // full profile is sent here
+            role: user?.role,
+            profile: user, // full profile is sent here
             token: token
         });
     } catch (error) {

@@ -8,7 +8,8 @@ const vitalsSchema = new mongoose.Schema(
     respRate: { type: String },          // 16/min
     spo2: { type: String },              // 98 %
     weight: { type: String },            // 75 kg
-    height: { type: String }             // 175 cm
+    height: { type: String },            // 175 cm
+    bloodgroup: { type: String }           // 175 cm
   },
   { _id: false }
 );

@@ -212,7 +212,7 @@ export const hosptialPatients = async (req, res) => {
         );
 
         const fees = prescriptions.map(p => p.prescriptionfees);
-    
+
 
         // -----------------------------
         // RESPONSE
@@ -236,6 +236,8 @@ export const findHospital = async (req, res) => {
 
     try {
         const user = req.user
+        console.log("user", user);
+
         const profile = await UserModel.findById(user?.id)
         if (!profile) return res.status(404).json({ message: "user not found" });
 
@@ -251,7 +253,7 @@ export const findHospital = async (req, res) => {
                 path: "doctorIds",
                 match: { isDeleted: false },
                 populate: {
-                    path: "personalAssitantId",
+                    path: "personalAssistantId",
                     match: { isDeleted: false },
                 }
             },

@@ -37,7 +37,18 @@ const treatmentHistorySchema = new mongoose.Schema(
         status: {
             type: String,
             default: "Completed"
-        }
+        },
+        pastPatientRecord: [
+            {
+                category: String,
+                files: Array
+            }
+        ],
+        addharDocumnets: {
+            addharfrontPath: String,
+            addharbackPath: String,
+            uploadedAt: { type: Date, default: Date.now }
+        },
     },
     { _id: false }
 );

@@ -243,7 +243,7 @@ export const findHospitalById = async (req, res) => {
                 path: "doctorIds",
                 match: { isDeleted: false },
                 populate: {
-                    path: "personalAssitantId",
+                    path: "personalAssistantId",
                     match: { isDeleted: false },
                 }
             },
@@ -632,7 +632,7 @@ export const patientsByHospitalById = async (req, res) => {
     }
 }
 
-export const addPersonalAssitant = async (req, res) => {
+export const addpersonalAssistant = async (req, res) => {
     console.log(req.body);
 
     try {
@@ -648,7 +648,7 @@ export const addPersonalAssitant = async (req, res) => {
         // const hashPassword = await bcrypt.hash(String(password), salt)
         const newPa = await UserModel.create({
             adminId: superAdmin?.id,
-            role: 'personalAssitant',
+            role: 'personalAssistant',
             name: name,
             contact: contact,
             creationfor: creationfor,
@@ -659,12 +659,12 @@ export const addPersonalAssitant = async (req, res) => {
             gender: gender,
             hospitalId: hosId,
             doctorId: docId,
-            role: 'personalAssitant',
+            role: 'personalAssistant',
         })
 
         const updated = await UserModel.findByIdAndUpdate(docId, {
             $set: {
-                personalAssitantId: newPa._id
+                personalAssistantId: newPa._id
             }
         }, {
             new: true

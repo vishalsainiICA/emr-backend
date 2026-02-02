@@ -11,7 +11,7 @@ import {
     updateStatus
 } from "../controllers/superAdminServices.js";
 import { verifyToken } from "../utills/jwtToken.js";
-import { addPersonalAssitant } from "../controllers/commonServices.js";
+import { addpersonalAssistant } from "../controllers/commonServices.js";
 import upload from "../middlewares/multer.js";
 
 
@@ -31,7 +31,7 @@ app.delete('/hospital/delete-pa', deletePa)
 
 
 // Patients
-app.post("/doctor/add-pa", verifyToken, addPersonalAssitant)
+app.post("/doctor/add-pa", verifyToken, addpersonalAssistant)
 
 app.get('/patients/allPatients', allPatients)
 app.get('/patients/hospitalAllPaitent', hosptialPatients)

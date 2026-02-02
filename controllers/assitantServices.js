@@ -26,7 +26,9 @@ export const saveInitialAssessment = async (req, res) => {
                 respRate: initialAssessment?.vitals?.respRate || "",
                 spo2: initialAssessment?.vitals?.spo2 || "",
                 weight: initialAssessment?.vitals?.weight || "",
-                height: initialAssessment?.vitals?.height || ""
+                height: initialAssessment?.vitals?.height || "",
+                bloodgroup: initialAssessment?.vitals?.bloodgroup || ""
+
             },
 
             complaint: initialAssessment?.complaint || "",
@@ -45,6 +47,8 @@ export const saveInitialAssessment = async (req, res) => {
                 status: "Assessment Done"
             }
         })
+        console.log("Updaed", updated);
+
 
         if (updated) {
             return res.status(200).json({
@@ -68,85 +72,79 @@ export const saveInitialAssessment = async (req, res) => {
     }
 };
 
-
 export const getWitNoAssessmentPatient = async (req, res) => {
     try {
-
         const user = req.user;
-        const date = req.query?.date
-        const status = req.query?.status
-        console.log(user);
+        const { date, status } = req.query;
 
-        let query = {
-            registerarId: user?.id,
-
-
+        if (!user?.id) {
+            return res.status(400).json({ message: "Invalid user" });
         }
+
+        // Base query
+        let query = { registerarId: user.id };
+
+        // Handle date filter
         if (date) {
             const selected = new Date(date);
-            const start = selected.setHours(0, 0, 0, 0);
-            const end = selected.setHours(23, 59, 59, 999)
-            query.updatedAt = { $gte: start, $lte: end }
+            const start = new Date(selected.setHours(0, 0, 0, 0));
+            const end = new Date(selected.setHours(23, 59, 59, 999));
+            query.updatedAt = { $gte: start, $lte: end };
         }
-
-        else if (status == "today") {
-
+        else if (status === "today") {
             const startOfDay = new Date();
             startOfDay.setHours(0, 0, 0, 0);
-
             const endOfDay = new Date();
             endOfDay.setHours(23, 59, 59, 999);
-            query.updatedAt = { $gte: startOfDay, $lte: endOfDay }
+            query.updatedAt = { $gte: startOfDay, $lte: endOfDay };
         }
         else if (status === "postponed") {
-            query.status = "Postponed"
+            query.status = "Postponed";
         }
         else if (status === "cancel") {
-            query.status = "Cancel"
+            query.status = "Cancel";
         }
+        // status === "all" → no extra filter
 
-        else if (status === "all") {
-        }
+        // Fetch patients with population
+        const [patients, pendingAssessment, totalPatient] = await Promise.all([
+            PatientModel.find(query)
+                .populate("initialAssementId")
+                .populate({
+                    path: "treatmentHistory",
+                    populate: [
+                        { path: "doctorId", model: "userModel" },
+                        { path: "prescriptionId", model: "prescribtion" },
+                        { path: "initialAssementId", model: "initialassessment" },
+                    ],
+                })
+                .sort({ updatedAt: -1 }),
+            PatientModel?.countDocuments({ registerarId: user.id, initialAssementId: { $eq: null } }),
+            PatientModel?.countDocuments({ registerarId: user.id }),
 
+        ])
 
-        // else {
-        //     const startOfDay = new Date();
-        //     startOfDay.setHours(0, 0, 0, 0);
-
-        //     const endOfDay = new Date();
-        //     endOfDay.setHours(23, 59, 59, 999);
-        //     query.updatedAt = { $gte: startOfDay, $lte: endOfDay }
-        // }
-        const TodayPatient = await PatientModel.find(query).populate("initialAssementId")
-            .populate({
-                path: "treatmentHistory",
-                populate: [
-                    {
-                        path: "doctorId",
-                        model: "userModel"
-                    },
-                    {
-                        path: "prescriptionId",
-                        model: "prescribtion"
-                    },
-                    {
-                        path: "initialAssementId",
-                        model: "initialassessment"
-                    }
-                ]
-            }).sort({ updatedAt: -1 }) // latest first
+        // Metrics
+        const today = new Date();
+        today.setHours(0, 0, 0, 0);
+        const endOfToday = new Date();
+        endOfToday.setHours(23, 59, 59, 999);
 
         return res.status(200).json({
             message: "success",
-            data: TodayPatient,
-
+            data: patients,
+            metrices: {
+                todayPatient: patients?.length,
+                pendingAssessment: pendingAssessment,
+                patientRecord: totalPatient,
+            },
         });
-
     } catch (error) {
         console.error(error);
-        res.status(500).json({ message: "Error fetching patients" });
+        return res.status(500).json({ message: "Error fetching patients", error });
     }
 };
+
 export const getAllPatientRecords = async (req, res) => {
     try {
         const user = req.user;

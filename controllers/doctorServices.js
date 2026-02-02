@@ -71,7 +71,7 @@ export const todayPatient = async (req, res) => {
                 initialAssementId: { $ne: null },
                 currentPrescriptionId: { $eq: null },
 
-            }).populate('initialAssementId').limit(5),
+            }).populate('initialAssementId registerarId').limit(5),
         ]);
 
         return res.status(200).json({
@@ -197,9 +197,21 @@ export const getAllPatientRecords = async (req, res) => {
         const patients = await PatientModel.find(query).populate("initialAssementId currentPrescriptionId")
             .populate({
                 path: "treatmentHistory",
-                populate: "doctorId",
-                populate: "prescriptionId"
-            })
+                populate: [
+                    {
+                        path: "doctorId",
+                        model: "userModel"
+                    },
+                    {
+                        path: "prescriptionId",
+                        model: "prescribtion"
+                    },
+                    {
+                        path: "initialAssementId",
+                        model: "initialassessment"
+                    }
+                ]
+            }).sort({ updatedAt: -1 }) // latest first
 
         return res.status(200).json({
             message: "success",
@@ -282,6 +294,11 @@ export const savePrescribtion = async (req, res) => {
         const prescription = await PrescribtionModel.create(payload);
 
         /*2. Update patient (CURRENT + HISTORY) */
+        const patient = await PatientModel?.findById(patientId);
+        if (!patient) return res.status(404).json({
+            success: false,
+            message: "Patient not found",
+        });
         const updatedPatient = await PatientModel.findByIdAndUpdate(
             patientId,
             {
@@ -298,7 +315,9 @@ export const savePrescribtion = async (req, res) => {
                         diagnosis: illness,
                         notes: symptoms,
                         status: "Prescribed",
-                        treatedAt: new Date()
+                        treatedAt: new Date(),
+                        pastPatientRecord: patient?.pastDocuments,
+                        addharDocumnets: patient?.addharDocumnets
                     }
                 }
             },
