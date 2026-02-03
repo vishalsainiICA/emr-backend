@@ -1,7 +1,7 @@
 import express from "express";
 import { verifyToken } from "../utills/jwtToken.js";
 
-import { addBranch, addHospital, addDepartments, changePatientStatus, deleteHospital, deleteSingleDepartment, editHospital, findHospitalById, patientsByHospitalById, registerPatient, removeDoctorById, updateHospital, updateProfile, validateMobileNo, getAllIllness } from "../controllers/commonServices.js";
+import { addBranch, addHospital, addDepartments, changePatientStatus, deleteHospital, deleteSingleDepartment, editHospital, findHospitalById, patientsByHospitalById, registerPatient, removeDoctorById, updateHospital, updateProfile, validateMobileNo, getAllIllness, updatePatient } from "../controllers/commonServices.js";
 import upload from "../middlewares/multer.js";
 
 
@@ -37,6 +37,11 @@ app.post('/patient/register-patient', verifyToken, upload.fields([{ name: 'docum
 { name: "aadhaarBack" }
 
 ]), registerPatient)
+app.post('/patient/update-patient', verifyToken, upload.fields([{ name: 'documents' },
+{ name: "aadhaarFront" },
+{ name: "aadhaarBack" }
+
+]), updatePatient)
 app.post('/patient/validate-mobile', validateMobileNo);
 app.get('/patient/illness', getAllIllness);
 

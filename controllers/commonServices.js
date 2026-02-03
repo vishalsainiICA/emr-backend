@@ -463,6 +463,8 @@ export const updateSingleDoctor = async (req, res) => {
 
 
 export const registerPatient = async (req, res) => {
+    // console.log(req.body);
+
     try {
         const user = req.user;
 
@@ -477,7 +479,7 @@ export const registerPatient = async (req, res) => {
             });
         }
 
-        const { contact, doctorId } = req.body;
+        const { contact, doctorId, _id } = req.body;
 
         if (!contact) {
             return res.status(400).json({
@@ -611,6 +613,169 @@ export const registerPatient = async (req, res) => {
         });
     }
 };
+
+
+export const updatePatient = async (req, res) => {
+    try {
+        const user = req.user;
+
+        const profile = await UserModel
+            .findById(user?.id)
+            .populate("hospitalId");
+
+        if (!profile || !profile.hospitalId) {
+            return res.status(400).json({
+                success: false,
+                message: "Profile or Hospital not found"
+            });
+        }
+
+        const { patientId, contact, doctorId } = req.body;
+
+        if (!patientId) {
+            return res.status(400).json({
+                success: false,
+                message: "patientId is required"
+            });
+        }
+
+        /* ---------------- Find patient (hospital-wise) ---------------- */
+        const patient = await PatientModel.findOne({
+            _id: patientId,
+            hospitalId: profile.hospitalId._id
+        });
+
+        if (!patient) {
+            return res.status(404).json({
+                success: false,
+                message: "Patient not found"
+            });
+        }
+
+        /* ---------------- Past Documents ---------------- */
+        let pastDocuments = patient.pastDocuments || [];
+
+        const categories = Array.isArray(req.body.categories)
+            ? req.body.categories
+            : [];
+
+        const counts = Array.isArray(req.body.fileCount)
+            ? req.body.fileCount
+            : [];
+
+        const files = req.files?.documents || [];
+
+        if (categories.length && files.length) {
+            let index = 0;
+            const newDocs = [];
+
+            for (let i = 0; i < categories.length; i++) {
+                const count = Number(counts[i] || 0);
+                const catFiles = [];
+
+                for (let j = 0; j < count; j++) {
+                    if (files[index]) {
+                        catFiles.push({
+                            path: files[index].path.replace(/\\/g, "/")
+                        });
+                        index++;
+                    }
+                }
+
+                if (catFiles.length) {
+                    newDocs.push({
+                        category: categories[i],
+                        files: catFiles
+                    });
+                }
+            }
+
+            pastDocuments = [...pastDocuments, ...newDocs];
+        }
+
+        /* ---------------- Aadhaar ---------------- */
+        let addharDocuments = patient.addharDocuments || {};
+
+        const aadhaarFront = req.files?.aadhaarFront?.[0];
+        const aadhaarBack = req.files?.aadhaarBack?.[0];
+
+        if (aadhaarFront) {
+            addharDocuments.addharfrontPath =
+                aadhaarFront.path.replace(/\\/g, "/");
+        }
+
+        if (aadhaarBack) {
+            addharDocuments.addharbackPath =
+                aadhaarBack.path.replace(/\\/g, "/");
+        }
+
+        /* ---------------- Patient Category ---------------- */
+        let patientCategory = patient.patientCategory;
+        if (req.body.patientCategory) {
+            try {
+                patientCategory = JSON.parse(req.body.patientCategory);
+            } catch {
+                return res.status(400).json({
+                    success: false,
+                    message: "Invalid patientCategory JSON"
+                });
+            }
+        }
+
+        /* ---------------- Update Object ---------------- */
+        const updateObject = {
+            name: req.body.name ?? patient.name,
+            gender: req.body.gender ?? patient.gender,
+            phone: contact ?? patient.phone,
+            email: req.body.email ?? patient.email,
+            nationality: req.body.nationality ?? patient.nationality,
+            whatsApp: req.body.whatsApp ?? patient.whatsApp,
+
+            permanentAddress:
+                req.body.permanentAddress ?? patient.permanentAddress,
+            currentAddress:
+                req.body.currentAddress ?? patient.currentAddress,
+
+            patientCategory,
+
+            attendeeName: req.body.attendeeName ?? patient.attendeeName,
+            attendeePhone: req.body.attendeePhone ?? patient.attendeePhone,
+            attendeeRelation:
+                req.body.attendeeRelation ?? patient.attendeeRelation,
+
+            city: req.body.city ?? patient.city,
+            state: req.body.state ?? patient.state,
+            age: req.body.age ?? patient.age,
+
+            addharDocuments,
+            pastDocuments,
+
+            currentDoctorId: doctorId ?? patient.currentDoctorId
+        };
+
+        const updatedPatient = await PatientModel.findByIdAndUpdate(
+            patientId,
+            { $set: updateObject },
+            { new: true }
+        );
+
+        return res.status(200).json({
+            success: true,
+            message: "Patient Updated Successfully",
+            data: updatedPatient
+        });
+
+    } catch (error) {
+        console.error("Error while Updating Patient:", error);
+        return res.status(500).json({
+            success: false,
+            message: "Internal Server Error",
+            error: error.message
+        });
+    }
+};
+
+
 
 
 
