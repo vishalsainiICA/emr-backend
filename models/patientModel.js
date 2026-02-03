@@ -151,6 +151,10 @@ const patientSchema = new mongoose.Schema(
                 files: Array
             }
         ],
+        pastDocumentSummary: {
+            type: Object,
+            default: null
+        },
 
         /*FULL TREATMENT HISTORY */
         treatmentHistory: [treatmentHistorySchema],

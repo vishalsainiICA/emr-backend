@@ -5,6 +5,7 @@ import UserModel from "../models/userModel.js";
 import DepartmentModel from "../models/departmentModel.js";
 import PatientModel from "../models/patientModel.js";
 import IllnessModel from "../models/illnessModel.js";
+import { getPatientSummary } from "../middlewares/getPatientSummary.js";
 
 
 export const addHospital = async (req, res) => {
@@ -518,6 +519,9 @@ export const registerPatient = async (req, res) => {
 
         let finalData = [];
         let index = 0;
+
+        //  save patient summary and save in patient model
+        await getPatientSummary(files)
 
         for (let i = 0; i < categories.length; i++) {
             const category = categories[i];
