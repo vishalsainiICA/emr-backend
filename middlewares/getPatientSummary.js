@@ -1,23 +1,57 @@
-import axios from "axios"
-import PatientModel from "../models/patientModel.js";
+import fs from "fs";
+import FormData from "form-data";
+import axios from "axios";
 
+export const getPatientSummary = async (files = []) => {
+    // console.log("getPatientSummary called");
+    console.log("Total files received:", files.length);
 
-export const getPatientSummary = async (files, patientId) => {
-    try {
-        const res = await axios.post("https://disease-rag-api-k12s.onrender.com/summarise", files)
-
-        if (res.status === 200) {
-            console.log(res.data);
-
-            await PatientModel.findByIdAndUpdate(patientId, {
-                $set: {
-                    pastDocumentSummary: res.data
-                }
-            })
-        }
-    } catch (error) {
-        return new Error(error)
+    if (!files.length) {
+        console.warn(" No files provided for summary");
+        return null;
     }
 
-}
+    const formData = new FormData();
+
+    files.forEach((file, index) => {
+        // console.log(`📎 Attaching file [${index}]`, {
+        //     name: file.originalname,
+        //     path: file.path,
+        //     type: file.mimetype,
+        //     size: file.size
+        // });
+
+        if (!fs.existsSync(file.path)) {
+            throw new Error("File missing on disk: " + file.path);
+        }
+
+        //SAME FIELD NAME "files" EVERY TIME
+        formData.append(
+            "files",
+            fs.createReadStream(file.path),
+            file.originalname
+        );
+    });
+
+    console.log("Sending request to Disease RAG API...");
+
+    const response = await axios.post(
+        "https://disease-rag-api-k12s.onrender.com/summarise",
+        formData,
+        {
+            headers: {
+                Accept: "application/json"
+                // Content-Type mat set karo
+            },
+            timeout: 60000,
+            maxBodyLength: Infinity
+        }
+    );
+
+    console.log("Summary API success:", response.status);
+    return response.data;
+};
+
+
+
 

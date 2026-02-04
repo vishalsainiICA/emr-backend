@@ -464,7 +464,8 @@ export const updateSingleDoctor = async (req, res) => {
 
 
 export const registerPatient = async (req, res) => {
-    // console.log(req.body);
+    console.log(req.body);
+    console.log(req.files);
 
     try {
         const user = req.user;
@@ -515,13 +516,13 @@ export const registerPatient = async (req, res) => {
         /*Past documents handling */
         const categories = req.body.categories || [];
         const counts = req.body.fileCount || [];
-        const files = req.files?.documents || [];
+        const files = req.files?.files || [];
 
         let finalData = [];
         let index = 0;
 
         //  save patient summary and save in patient model
-        await getPatientSummary(files)
+
 
         for (let i = 0; i < categories.length; i++) {
             const category = categories[i];
@@ -601,6 +602,22 @@ export const registerPatient = async (req, res) => {
             { $inc: { totalPatient: 1 } },
             { new: true }
         );
+
+        setImmediate(async () => {
+            try {
+                const summary = await getPatientSummary(files)
+                await PatientModel.findByIdAndUpdate(newPatient?._id, {
+                    pastDocumentSummary: summary,
+                })
+            } catch (error) {
+                console.error("Summary failed:", error);
+
+                await PatientModel.findByIdAndUpdate(newPatient._id, {
+                    summaryStatus: "failed"
+                });
+            }
+
+        })
 
         return res.status(201).json({
             success: true,

@@ -155,7 +155,9 @@ const patientSchema = new mongoose.Schema(
             type: Object,
             default: null
         },
-
+        summaryStatus: {
+            type: String,
+        },
         /*FULL TREATMENT HISTORY */
         treatmentHistory: [treatmentHistorySchema],
 

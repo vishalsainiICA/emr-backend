@@ -32,12 +32,12 @@ app.put('/change-status', changePatientStatus)
 
 
 // patient
-app.post('/patient/register-patient', verifyToken, upload.fields([{ name: 'documents' },
+app.post('/patient/register-patient', verifyToken, upload.fields([{ name: 'files' },
 { name: "aadhaarFront" },
 { name: "aadhaarBack" }
 
 ]), registerPatient)
-app.post('/patient/update-patient', verifyToken, upload.fields([{ name: 'documents' },
+app.post('/patient/update-patient', verifyToken, upload.fields([{ name: 'files' },
 { name: "aadhaarFront" },
 { name: "aadhaarBack" }
 
