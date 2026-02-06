@@ -61,25 +61,27 @@ export const todayPatient = async (req, res) => {
         const startOfDay = new Date();
         startOfDay.setHours(0, 0, 0, 0);
 
+        console.log("doc", doctorId);
+
         const endOfDay = new Date();
         endOfDay.setHours(23, 59, 59, 999);
 
         const [patients, todayConsultations, todayPrescription] = await Promise.all([
             await PatientModel.find({
                 // updatedAt: { $gte: startOfDay, $lte: endOfDay },
-                _id: doctorId,
+                currentDoctorId: doctorId,
                 initialAssementId: { $ne: null },
                 currentPrescriptionId: { $eq: null },
 
             }).populate('initialAssementId registerarId').limit(5),
 
             PatientModel.countDocuments({
-                _id: doctorId,
-                updatedAt: { $gte: startOfDay, $lte: endOfDay }
+                currentDoctorId: doctorId,
+                createdAt: { $gte: startOfDay, $lte: endOfDay }
             }),
             PatientModel.countDocuments({
-                _id: doctorId,
-                updatedAt: { $gte: startOfDay, $lte: endOfDay },
+                currentDoctorId: doctorId,
+                createdAt: { $gte: startOfDay, $lte: endOfDay },
                 initialAssementId: { $ne: null },
                 currentPrescriptionId: { $ne: null },
             }),

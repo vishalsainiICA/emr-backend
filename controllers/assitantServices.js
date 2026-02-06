@@ -119,7 +119,7 @@ export const getWitNoAssessmentPatient = async (req, res) => {
                     ],
                 })
                 .sort({ updatedAt: -1 }),
-            PatientModel?.countDocuments({ registerarId: user.id, initialAssementId: { $eq: null }, updatedAt: { $gte: startOfDay, $lte: endOfDay } }),
+            PatientModel?.countDocuments({ registerarId: user.id, createdAt: { $gte: startOfDay, $lte: endOfDay } }),
             PatientModel?.countDocuments({ registerarId: user.id, initialAssementId: { $eq: null } }),
             PatientModel?.countDocuments({ registerarId: user.id }),
 
@@ -130,6 +130,8 @@ export const getWitNoAssessmentPatient = async (req, res) => {
         today.setHours(0, 0, 0, 0);
         const endOfToday = new Date();
         endOfToday.setHours(23, 59, 59, 999);
+        // console.log("todaypatuent", todayPatients);
+
 
         return res.status(200).json({
             message: "success",
