@@ -35,22 +35,44 @@ export const getPatientSummary = async (files = []) => {
 
     console.log("Sending request to Disease RAG API...");
 
-    const response = await axios.post(
-        "https://disease-rag-api-k12s.onrender.com/summarise",
-        formData,
-        {
-            headers: {
-                Accept: "application/json"
-                // Content-Type mat set karo
-            },
-            timeout: 60000,
-            maxBodyLength: Infinity
-        }
-    );
-
-    console.log("Summary API success:", response.status);
-    return response.data;
+    return await callSummaryApi(formData)
 };
+
+function wait(ms) {
+    return new Promise(resolve => setTimeout(resolve, ms));
+}
+const callSummaryApi = async (formData, timeoutMs = 15000, retries = 2) => {
+    for (let attempt = 1; attempt <= retries + 1; attempt++) {
+        try {
+            console.log("attempt--", attempt);
+
+            const controller = new AbortController();
+            const timeout = setTimeout(() => controller.abort(), timeoutMs);
+
+            const response = await axios.post(
+                "https://disease-rag-api-k12s.onrender.com/summarise",
+                formData,
+                {
+                    headers: { Accept: "application/json" },
+                    maxBodyLength: Infinity,
+                    signal: controller.signal
+                }
+            );
+
+            clearTimeout(timeout);
+            return response.data;
+
+        } catch (error) {
+            console.error("Summary API error:", error.message);
+
+            if (attempt <= retries) {
+                await wait(500 * attempt);
+            }
+        }
+    }
+    return null;
+};
+
 
 
 

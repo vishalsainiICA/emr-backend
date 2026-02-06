@@ -82,7 +82,11 @@ export const getWitNoAssessmentPatient = async (req, res) => {
         }
 
         // Base query
-        let query = { registerarId: user.id };
+        let query = { registerarId: user.id, initialAssementId: { $eq: null }, currentPrescriptionId: { $eq: null } };
+        const startOfDay = new Date();
+        startOfDay.setHours(0, 0, 0, 0);
+        const endOfDay = new Date();
+        endOfDay.setHours(23, 59, 59, 999);
 
         // Handle date filter
         if (date) {
@@ -92,10 +96,6 @@ export const getWitNoAssessmentPatient = async (req, res) => {
             query.updatedAt = { $gte: start, $lte: end };
         }
         else if (status === "today") {
-            const startOfDay = new Date();
-            startOfDay.setHours(0, 0, 0, 0);
-            const endOfDay = new Date();
-            endOfDay.setHours(23, 59, 59, 999);
             query.updatedAt = { $gte: startOfDay, $lte: endOfDay };
         }
         else if (status === "postponed") {
@@ -107,7 +107,7 @@ export const getWitNoAssessmentPatient = async (req, res) => {
         // status === "all" → no extra filter
 
         // Fetch patients with population
-        const [patients, pendingAssessment, totalPatient] = await Promise.all([
+        const [patients, todayPatients, pendingAssessment, totalPatient] = await Promise.all([
             PatientModel.find(query)
                 .populate("initialAssementId")
                 .populate({
@@ -119,6 +119,7 @@ export const getWitNoAssessmentPatient = async (req, res) => {
                     ],
                 })
                 .sort({ updatedAt: -1 }),
+            PatientModel?.countDocuments({ registerarId: user.id, initialAssementId: { $eq: null }, updatedAt: { $gte: startOfDay, $lte: endOfDay } }),
             PatientModel?.countDocuments({ registerarId: user.id, initialAssementId: { $eq: null } }),
             PatientModel?.countDocuments({ registerarId: user.id }),
 
@@ -134,7 +135,7 @@ export const getWitNoAssessmentPatient = async (req, res) => {
             message: "success",
             data: patients,
             metrices: {
-                todayPatient: patients?.length,
+                todayPatient: todayPatients,
                 pendingAssessment: pendingAssessment,
                 patientRecord: totalPatient,
             },
@@ -208,6 +209,36 @@ export const getAllPatientRecords = async (req, res) => {
     }
 };
 
+export const getAssessmentPatients = async (req, res) => {
+    try {
+        const user = req.user;
+        let query = {
+            registerarId: user?.id,
+        };
+
+        const patients = await PatientModel.find(query)
+            .populate("initialAssementId currentPrescriptionId")
+            .populate({
+                path: "treatmentHistory",
+                populate: [
+                    { path: "doctorId", model: "userModel" },
+                    { path: "prescriptionId", model: "prescribtion" },
+                    { path: "initialAssementId", model: "initialassessment" }
+                ]
+            })
+            .sort({ updatedAt: -1 })
+
+
+        return res.status(200).json({
+            message: "success",
+            data: patients
+        });
+
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ message: "Error fetching patients" });
+    }
+};
 
 export const getProfile = async (req, res) => {
     console.log(req.user);

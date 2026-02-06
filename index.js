@@ -10,6 +10,7 @@ import doctorRoutes from './routes/doctorRoutes.js'
 import commonRoutes from './routes/commonRotutes.js'
 import assitantRoutes from './routes/assitantRotues.js'
 import labtestModel from './models/labtestModel.js';
+import handleApiLimit from './middlewares/apiLimiter.js';
 dotenv.config();
 const app = express();
 dbConnect();
@@ -32,13 +33,13 @@ app.use(express.json());
 app.use('/super-admin', superAdminRoutes)
 app.use('/admin', adminRoutes)
 app.use('/medical-director', medicalDirectorRoutes)
-app.use('/doctor', doctorRoutes)
-app.use('/assitant', assitantRoutes)
-app.use('/common', commonRoutes)
+app.use('/doctor', handleApiLimit, doctorRoutes)
+app.use('/assitant', handleApiLimit, assitantRoutes)
+app.use('/common', handleApiLimit, commonRoutes)
 
 // to handel same login sytem with diffrent user 
 app.post('/api/login', login)
-app.get("/",(req, res) => {
+app.get("/", (req, res) => {
     res.status(200).send("Server is Running")
 })
 

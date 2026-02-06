@@ -64,20 +64,36 @@ export const todayPatient = async (req, res) => {
         const endOfDay = new Date();
         endOfDay.setHours(23, 59, 59, 999);
 
-        const [doctorProfile, todayPatient] = await Promise.all([
-            UserModel.findById(doctorId).populate('hospitalId'),
-            PatientModel.find({
-                updatedAt: { $gte: startOfDay, $lte: endOfDay },
+        const [patients, todayConsultations, todayPrescription] = await Promise.all([
+            await PatientModel.find({
+                // updatedAt: { $gte: startOfDay, $lte: endOfDay },
+                _id: doctorId,
                 initialAssementId: { $ne: null },
                 currentPrescriptionId: { $eq: null },
 
             }).populate('initialAssementId registerarId').limit(5),
-        ]);
 
+            PatientModel.countDocuments({
+                _id: doctorId,
+                updatedAt: { $gte: startOfDay, $lte: endOfDay }
+            }),
+            PatientModel.countDocuments({
+                _id: doctorId,
+                updatedAt: { $gte: startOfDay, $lte: endOfDay },
+                initialAssementId: { $ne: null },
+                currentPrescriptionId: { $ne: null },
+            }),
+
+        ]);
         return res.status(200).json({
-            message: 'success', data: {
-                doctorProfile,
-                todayPatient
+            message: 'success',
+            metrices: {
+                readyforConsultation: patients?.length,
+                todayConsultations,
+                todayPrescription
+            },
+            data: {
+                todayPatient: patients
             }
         })
     } catch (error) {

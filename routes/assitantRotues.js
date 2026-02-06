@@ -1,5 +1,5 @@
 import express from "express";
-import { dailyActivity, editProfile, getAllPatientRecords, getProfile, getWitNoAssessmentPatient, registerPatient, saveInitialAssessment } from "../controllers/assitantServices.js";
+import { dailyActivity, editProfile, getAllPatientRecords, getAssessmentPatients, getProfile, getWitNoAssessmentPatient, registerPatient, saveInitialAssessment } from "../controllers/assitantServices.js";
 import { verifyToken } from "../utills/jwtToken.js";
 import upload from "../middlewares/multer.js";
 
@@ -18,6 +18,7 @@ app.put('/auth/edit-profile', upload.none(), verifyToken, editProfile)
 app.get('/today-patient', verifyToken, getAllPatientRecords)
 app.get('/no-assessment-patient', verifyToken, getWitNoAssessmentPatient)
 app.get('/all-patient-record', verifyToken, getAllPatientRecords)
+app.get('/get-assessment-patient', verifyToken, getAssessmentPatients)
 app.get("/daily-activity", verifyToken, dailyActivity)
 app.post('/intital-assement', saveInitialAssessment)
 export default app
