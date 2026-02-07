@@ -1,7 +1,7 @@
 import ip from "ip";
 import redis from "./redis.js"
 
-const MAX_API_LIMIT = 15; // max requests
+const MAX_API_LIMIT = 20; // max requests
 const MAX_TIME = 30;      // seconds
 
 const handleApiLimit = async (req, res, next) => {
