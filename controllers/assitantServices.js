@@ -3,7 +3,7 @@ import PatientModel from "../models/patientModel.js";
 import UserModel from "../models/userModel.js";
 
 
-export const saveInitialAssessment = async (req, res) => {
+export const saveInitialAssessment = async (req, res, next) => {
     try {
         const { patientId, initialAssessment } = req.body;
         console.log(req.body);
@@ -65,14 +65,11 @@ export const saveInitialAssessment = async (req, res) => {
         });
     } catch (error) {
         console.error("Save Assessment Error:", error);
-        res.status(500).json({
-            success: false,
-            message: "Server error"
-        });
+        next(error)
     }
 };
 
-export const getWitNoAssessmentPatient = async (req, res) => {
+export const getWitNoAssessmentPatient = async (req, res, next) => {
     try {
         const user = req.user;
         const { date, status } = req.query;
@@ -144,11 +141,11 @@ export const getWitNoAssessmentPatient = async (req, res) => {
         });
     } catch (error) {
         console.error(error);
-        return res.status(500).json({ message: "Error fetching patients", error });
+        next(error)
     }
 };
 
-export const getAllPatientRecords = async (req, res) => {
+export const getAllPatientRecords = async (req, res, next) => {
     try {
         const user = req.user;
         const { startDate, endDate, status } = req.query;
@@ -207,11 +204,11 @@ export const getAllPatientRecords = async (req, res) => {
 
     } catch (error) {
         console.error(error);
-        res.status(500).json({ message: "Error fetching patients" });
+        next(error)
     }
 };
 
-export const getAssessmentPatients = async (req, res) => {
+export const getAssessmentPatients = async (req, res, next) => {
     try {
         const user = req.user;
         let query = {
@@ -238,25 +235,26 @@ export const getAssessmentPatients = async (req, res) => {
 
     } catch (error) {
         console.error(error);
-        res.status(500).json({ message: "Error fetching patients" });
+        next(error)
     }
 };
 
-export const getProfile = async (req, res) => {
+export const getProfile = async (req, res, next) => {
     console.log(req.user);
     try {
         const user = req.user
-        const profile = await UserModel.findById(user?.id).populate("doctorId")
+        const profile = await UserModel.findById(user?.id)
         if (!profile) return res.status(404).json({ message: "user not found" });
 
         return res.status(200).json({ message: "Success", data: profile });
     } catch (error) {
-        return res.status(500).json({ message: "Internal Server Error" });
+        console.log(error);
+        next(error)
 
     }
 }
 
-export const editProfile = async (req, res) => {
+export const editProfile = async (req, res, next) => {
 
     try {
         const user = req.user
@@ -282,11 +280,11 @@ export const editProfile = async (req, res) => {
         else return res.status(400).json({ message: "Error Update in Document", data: updated });
     } catch (error) {
         console.log(error)
-        return res.status(500).json({ message: "Internal Server Error" });
+        next(error);
 
     }
 }
-export const registerPatient = async (req, res) => {
+export const registerPatient = async (req, res, next) => {
     console.log(req.files);
 
     // try {
@@ -385,9 +383,7 @@ export const registerPatient = async (req, res) => {
     //     });
     // }
 };
-
-
-export const dailyActivity = async (req, res) => {
+export const dailyActivity = async (req, res, next) => {
     try {
         const user = req.user;
         // today rangeU
@@ -452,6 +448,6 @@ export const dailyActivity = async (req, res) => {
         });
     } catch (error) {
         console.error(error);
-        res.status(500).json({ message: "Internal Server Error" });
+        next(error)
     }
 }

@@ -3,6 +3,7 @@ import { verifyToken } from "../utills/jwtToken.js";
 
 import { addBranch, addHospital, addDepartments, changePatientStatus, deleteHospital, deleteSingleDepartment, editHospital, findHospitalById, patientsByHospitalById, registerPatient, removeDoctorById, updateHospital, updateProfile, validateMobileNo, getAllIllness, updatePatient } from "../controllers/commonServices.js";
 import upload from "../middlewares/multer.js";
+import { asyncHandler } from "../middlewares/requestId.middleware.js";
 
 
 
@@ -19,7 +20,7 @@ app.post('/hospital/addHospital', upload.fields([
         name: "watermarkImg", maxCount: 1
     }
 ]), addHospital);
-app.post('/hospital/add-branch', verifyToken, addBranch);
+app.post('/hospital/add-branch', verifyToken, asyncHandler(addBranch));
 app.put('/hospital/edit-hospital', upload.none(), editHospital);
 app.get('/hospital/single-hospital', findHospitalById);
 app.put('/hospital/update-hospital', updateHospital)
@@ -43,7 +44,7 @@ app.post('/patient/update-patient', verifyToken, upload.fields([{ name: 'files' 
 
 ]), updatePatient)
 app.post('/patient/validate-mobile', validateMobileNo);
-app.get('/patient/illness', getAllIllness);
+app.get('/patient/illness', asyncHandler(getAllIllness));
 
 
 // doctor

@@ -6,9 +6,10 @@ import DepartmentModel from "../models/departmentModel.js";
 import PatientModel from "../models/patientModel.js";
 import IllnessModel from "../models/illnessModel.js";
 import { getPatientSummary } from "../middlewares/getPatientSummary.js";
+import { auditLog } from "../middlewares/apiLogger.middleware.js";
 
 
-export const addHospital = async (req, res) => {
+export const addHospital = async (req, res, next) => {
     console.log(JSON.stringify(req.body));
 
     try {
@@ -115,121 +116,116 @@ export const addHospital = async (req, res) => {
 
     } catch (error) {
         console.error("Error in addHospital:", error);
-        return res.status(500).json({ message: "Internal Server Error" });
+        next(error)
     }
 };
 
 
-export const addBranch = async (req, res) => {
-    try {
-        const {
-            name,
-            city,
-            state,
-            pinCode,
-            address,
-            patientCategories,
-            supportedDepartments,
-            medicalDirector,
-            customLetterPad
-        } = req.body;
+export const addBranch = async (req, res, next) => {
+    const {
+        name,
+        city,
+        state,
+        pinCode,
+        address,
+        patientCategories,
+        supportedDepartments,
+        medicalDirector,
+        customLetterPad
+    } = req.body;
 
-        const admin = req.user;
+    const admin = req.user;
 
-        const id = req.query.hospitalId
-        if (!id) return res.status(400).json({ message: 'hospital id is requried' })
+    const id = req.query.hospitalId
+    if (!id) return res.status(400).json({ message: 'hospital id is requried' })
 
-        const hospital = await HospitalModel.findOne({ _id: id, isDeleted: false })
-        if (!hospital) return res.status(400).json({ message: 'hospital not found' })
-
-
-        // Create Hospital
-        const newHospital = await HospitalModel.create({
-            adminId: admin?._id,
-            name,
-            city,
-            state,
-            pinCode,
-            address,
-            // medicalDirector: newMedicalDirector._id,
-            // patientCategories: patientCategories || [],
-            // supportedDepartments: departmentIds,
-            // customLetterPad: customLetterPad,
-        });
-
-        // Create Medical Director
-        const newMedicalDirector = await UserModel.create({
-            name: medicalDirector.name,
-            email: medicalDirector.email,
-            password: medicalDirector.password,
-            contact: medicalDirector.contact,
-            licenseNo: medicalDirector.licenseNo,
-            signatureImage: medicalDirector.signatureImage,
-            adminId: admin?.id,
-            hospitalId: newHospital._id,
-            role: 'medicalDirector'
-        });
-
-        // Create Auth User for Medical Director
+    const hospital = await HospitalModel.findOne({ _id: id, isDeleted: false })
+    if (!hospital) return res.status(400).json({ message: 'hospital not found' })
 
 
-        //  Create Departments and Doctors
-        const departmentIds = await Promise.all(
-            supportedDepartments.map(async (dep) => {
-                const doctorIds = await Promise.all(
-                    (dep.doctor || []).map(async (doc) => {
-                        const newDoctor = await UserModel.create({
-                            name: doc.name,
-                            email: doc.email,
-                            password: doc.password,
-                            contact: doc.contact,
-                            licenseNo: doc.licenseNo,
-                            adminId: admin?.id,
-                            hospitalId: newHospital._id,
-                            departmentName: dep?.departmentName,
-                            role: 'doctor',
-                            signatureImage: doc.signatureImage,
-                        });
-                        return newDoctor._id;
-                    })
-                );
+    // Create Hospital
+    const newHospital = await HospitalModel.create({
+        adminId: admin?._id,
+        name,
+        city,
+        state,
+        pinCode,
+        address,
+        // medicalDirector: newMedicalDirector._id,
+        // patientCategories: patientCategories || [],
+        // supportedDepartments: departmentIds,
+        // customLetterPad: customLetterPad,
+    });
 
-                const newDepartment = await DepartmentModel.create({
-                    departmentName: dep.departmentName || null,
-                    doctorIds: doctorIds,
-                    adminId: admin?.id,
-                    hospitalId: newHospital._id,
-                });
+    // Create Medical Director
+    const newMedicalDirector = await UserModel.create({
+        name: medicalDirector.name,
+        email: medicalDirector.email,
+        password: medicalDirector.password,
+        contact: medicalDirector.contact,
+        licenseNo: medicalDirector.licenseNo,
+        signatureImage: medicalDirector.signatureImage,
+        adminId: admin?.id,
+        hospitalId: newHospital._id,
+        role: 'medicalDirector'
+    });
 
-                return newDepartment._id;
-            })
-        );
-        await HospitalModel.findByIdAndUpdate(newHospital._id, {
-            hospitalId: newHospital._id,
-            medicalDirector: newMedicalDirector._id,
-            patientCategories: patientCategories || [],
-            supportedDepartments: departmentIds,
-            customLetterPad: customLetterPad,
-        });
-        console.log(hospital);
+    // Create Auth User for Medical Director
 
-        hospital.branches = []
 
-        hospital.branches.push(newHospital._id)
-        await hospital.save()
+    //  Create Departments and Doctors
+    const departmentIds = await Promise.all(
+        supportedDepartments.map(async (dep) => {
+            const doctorIds = await Promise.all(
+                (dep.doctor || []).map(async (doc) => {
+                    const newDoctor = await UserModel.create({
+                        name: doc.name,
+                        email: doc.email,
+                        password: doc.password,
+                        contact: doc.contact,
+                        licenseNo: doc.licenseNo,
+                        adminId: admin?.id,
+                        hospitalId: newHospital._id,
+                        departmentName: dep?.departmentName,
+                        role: 'doctor',
+                        signatureImage: doc.signatureImage,
+                    });
+                    return newDoctor._id;
+                })
+            );
 
-        return res.status(200).json({
-            status: 200,
-            message: "New branch added successfully",
-            hospitalId: newHospital._id
-        });
-    } catch (error) {
-        console.error("Error:", error);
-        return res.status(500).json({ message: "Internal Server Error" });
-    }
-};
+            const newDepartment = await DepartmentModel.create({
+                departmentName: dep.departmentName || null,
+                doctorIds: doctorIds,
+                adminId: admin?.id,
+                hospitalId: newHospital._id,
+            });
 
-export const findHospitalById = async (req, res) => {
+            return newDepartment._id;
+        })
+    );
+    await HospitalModel.findByIdAndUpdate(newHospital._id, {
+        hospitalId: newHospital._id,
+        medicalDirector: newMedicalDirector._id,
+        patientCategories: patientCategories || [],
+        supportedDepartments: departmentIds,
+        customLetterPad: customLetterPad,
+    });
+    console.log(hospital);
+
+    hospital.branches = []
+
+    hospital.branches.push(newHospital._id)
+    await hospital.save()
+
+    return res.status(200).json({
+        status: 200,
+        message: "New branch added successfully",
+        hospitalId: newHospital._id
+    });
+}
+
+export const findHospitalById = async (req, res, next) => {
 
     try {
         const id = req.query.hospitalId
@@ -256,12 +252,12 @@ export const findHospitalById = async (req, res) => {
 
     } catch (error) {
         console.log(error);
-        return res.status(500).json({ message: 'Internal Server Error' })
+        next(error)
 
     }
 }
 
-export const updateHospital = async (req, res) => {
+export const updateHospital = async (req, res, next) => {
 
     try {
         const id = req.query.id;
@@ -298,11 +294,11 @@ export const updateHospital = async (req, res) => {
         });
     } catch (error) {
         console.error("Update Hospital Error:", error);
-        return res.status(500).json({ message: "Internal Server Error" });
+        next(error)
     }
 };
 
-export const deleteHospital = async (req, res) => {
+export const deleteHospital = async (req, res, next) => {
 
     try {
         const id = req.query.id
@@ -312,12 +308,12 @@ export const deleteHospital = async (req, res) => {
         return res.status(200).json({ message: 'success', data: hosptials })
 
     } catch (error) {
-        return res.status(500).json({ message: 'Internal Server Error' })
+        next(error)
 
     }
 }
 
-export const addDepartments = async (req, res) => {
+export const addDepartments = async (req, res, next) => {
     console.log(JSON.stringify(req.body));
     try {
         const { hospitalId, departments } = req.body;
@@ -393,14 +389,11 @@ export const addDepartments = async (req, res) => {
 
     } catch (error) {
         console.error(error);
-        return res.status(500).json({
-            message: "Internal Server Error",
-            error: error.message,
-        });
+        next(error)
     }
 };
 
-export const deleteSingleDepartment = async (req, res) => {
+export const deleteSingleDepartment = async (req, res, next) => {
     try {
         const { hospitalId, depId } = req.query
         if (!hospitalId || !depId) return res.status(400).json({ message: 'hospital id  and depId is requried' })
@@ -416,7 +409,41 @@ export const deleteSingleDepartment = async (req, res) => {
 
     }
 }
-export const updateSingleDepartment = async (req, res) => {
+export const updateSingleDepartment = async (req, res, next) => {
+    try {
+        const { hospitalId } = req.query
+        const id = req.query.id
+        if (!id) return res.status(400).json({ message: 'hospital id is requried' })
+        const hospital = await HospitalModel.findByIdAndUpdate(id, { supportedDepartments: { $push: req.body } })
+        if (!hospital) return res.status(400).json({ message: 'hospital not found' })
+    } catch (error) {
+        next(error)
+    }
+}
+
+export const addSingleDoctor = async (req, res, next) => {
+    try {
+        const { hospitalId } = req.query
+        const id = req.query.id
+        if (!id) return res.status(400).json({ message: 'hospital id is requried' })
+        const hospital = await HospitalModel.findByIdAndUpdate(id, { supportedDepartments: { $push: req.body } })
+        if (!hospital) return res.status(400).json({ message: 'hospital not found' })
+    } catch (error) {
+
+    }
+}
+export const deleteSingleDoctor = async (req, res, next) => {
+    try {
+
+        const id = req.query.id
+        if (!id) return res.status(400).json({ message: 'hospital id is requried' })
+        const hospital = await HospitalModel.findByIdAndUpdate(id, { supportedDepartments: { $push: req.body } })
+        if (!hospital) return res.status(400).json({ message: 'hospital not found' })
+    } catch (error) {
+
+    }
+}
+export const updateSingleDoctor = async (req, res, next) => {
     try {
         const { hospitalId } = req.query
         const id = req.query.id
@@ -428,42 +455,8 @@ export const updateSingleDepartment = async (req, res) => {
     }
 }
 
-export const addSingleDoctor = async (req, res) => {
-    try {
-        const { hospitalId } = req.query
-        const id = req.query.id
-        if (!id) return res.status(400).json({ message: 'hospital id is requried' })
-        const hospital = await HospitalModel.findByIdAndUpdate(id, { supportedDepartments: { $push: req.body } })
-        if (!hospital) return res.status(400).json({ message: 'hospital not found' })
-    } catch (error) {
 
-    }
-}
-export const deleteSingleDoctor = async (req, res) => {
-    try {
-
-        const id = req.query.id
-        if (!id) return res.status(400).json({ message: 'hospital id is requried' })
-        const hospital = await HospitalModel.findByIdAndUpdate(id, { supportedDepartments: { $push: req.body } })
-        if (!hospital) return res.status(400).json({ message: 'hospital not found' })
-    } catch (error) {
-
-    }
-}
-export const updateSingleDoctor = async (req, res) => {
-    try {
-        const { hospitalId } = req.query
-        const id = req.query.id
-        if (!id) return res.status(400).json({ message: 'hospital id is requried' })
-        const hospital = await HospitalModel.findByIdAndUpdate(id, { supportedDepartments: { $push: req.body } })
-        if (!hospital) return res.status(400).json({ message: 'hospital not found' })
-    } catch (error) {
-
-    }
-}
-
-
-export const registerPatient = async (req, res) => {
+export const registerPatient = async (req, res, next) => {
     console.log(req.body);
     console.log(req.files);
 
@@ -627,16 +620,12 @@ export const registerPatient = async (req, res) => {
 
     } catch (error) {
         console.error("Error while Registering Patient:", error);
-        return res.status(500).json({
-            success: false,
-            message: "Internal Server Error",
-            error: error.message
-        });
+        next(error)
     }
 };
 
 
-export const updatePatient = async (req, res) => {
+export const updatePatient = async (req, res, next) => {
     try {
         const user = req.user;
 
@@ -779,6 +768,16 @@ export const updatePatient = async (req, res) => {
             { $set: updateObject },
             { new: true }
         );
+        console.log("auditLog", "call");
+        auditLog({
+            action: "UPDATE",
+            module: "PATIENT",
+            userId: req.user.id,
+            oldData: patient,
+            newData: updateObject,
+            ip: req.ip,
+            requestId: req.requestId
+        });
 
         return res.status(200).json({
             success: true,
@@ -800,7 +799,7 @@ export const updatePatient = async (req, res) => {
 
 
 
-export const patientsByHospitalById = async (req, res) => {
+export const patientsByHospitalById = async (req, res, next) => {
 
     try {
         const id = req.query.hospitalId
@@ -813,12 +812,12 @@ export const patientsByHospitalById = async (req, res) => {
 
     } catch (error) {
         console.log(error);
-        return res.status(500).json({ message: 'Internal Server Error' })
+        next(error)
 
     }
 }
 
-export const addpersonalAssistant = async (req, res) => {
+export const addpersonalAssistant = async (req, res, next) => {
     console.log(req.body);
 
     try {
@@ -872,13 +871,13 @@ export const addpersonalAssistant = async (req, res) => {
         }
 
     } catch (error) {
-        console.error("Error:", error);
-        return res.status(500).json({ message: "Internal Server Error" });
+        console.log(error);
+        next(error)
 
     }
 }
 
-export const changePatientStatus = async (req, res) => {
+export const changePatientStatus = async (req, res, next) => {
     try {
         console.log(req.body);
 
@@ -929,11 +928,11 @@ export const changePatientStatus = async (req, res) => {
 
     } catch (error) {
         console.error(error);
-        res.status(500).json({ message: "Internal Server Error" });
+        next(error)
     }
 };
 
-export const editHospital = async (req, res) => {
+export const editHospital = async (req, res, next) => {
 
     try {
 
@@ -959,13 +958,13 @@ export const editHospital = async (req, res) => {
 
     } catch (error) {
         console.log(error)
-        return res.status(500).json({ message: "Internal Server Error" });
+        next(error)
 
     }
 }
 
 
-export const removeDoctorById = async (req, res) => {
+export const removeDoctorById = async (req, res, next) => {
 
     try {
 
@@ -986,13 +985,13 @@ export const removeDoctorById = async (req, res) => {
 
     } catch (error) {
         console.log(error)
-        return res.status(500).json({ message: "Internal Server Error" });
+        next(error)
 
     }
 }
 
 
-export const updateProfile = async (req, res) => {
+export const updateProfile = async (req, res, next) => {
 
     try {
 
@@ -1013,12 +1012,12 @@ export const updateProfile = async (req, res) => {
 
     } catch (error) {
         console.log(error)
-        return res.status(500).json({ message: "Internal Server Error" });
+        next(error)
 
     }
 }
 
-export const validateMobileNo = async (req, res) => {
+export const validateMobileNo = async (req, res, next) => {
 
     console.log(req.body);
 
@@ -1051,19 +1050,18 @@ export const validateMobileNo = async (req, res) => {
 
     } catch (error) {
         console.log(error)
-        return res.status(500).json({ message: "Internal Server Error" });
+        next(error)
 
     }
 }
 
-export const getAllIllness = async (req, res) => {
-
+export const getAllIllness = async (req, res, next) => {
     try {
         const illness = await IllnessModel.find()
         res.status(200).json({ message: "Success", data: illness });
     } catch (error) {
         console.log(error)
-        return res.status(500).json({ message: "Internal Server Error" });
+        next(error)
 
     }
 }

@@ -1,17 +1,13 @@
-import ip from "ip";
-import redis from "./redis.js"
+import redis from "../utills/redis.js"
 
 const MAX_API_LIMIT = 20; // max requests
-const MAX_TIME = 30;      // seconds
+const MAX_TIME = 10;      // seconds
 
 const handleApiLimit = async (req, res, next) => {
     try {
         //client IP (real user)
-        const userIp =
-            ip.address() ||
-            req.headers["x-forwarded-for"]?.split(",")[0] ||
-            req.socket.remoteAddress ||
-            req.ip;
+        const userIp = req.headers["x-forwarded-for"]?.split(",")[0] ||
+            req.socket.remoteAddress
 
         const key = `rate_limit:${userIp}`;
 

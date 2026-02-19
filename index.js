@@ -9,12 +9,16 @@ import medicalDirectorRoutes from './routes/medicalDirectorRoutes.js'
 import doctorRoutes from './routes/doctorRoutes.js'
 import commonRoutes from './routes/commonRotutes.js'
 import assitantRoutes from './routes/assitantRotues.js'
-import labtestModel from './models/labtestModel.js';
 import handleApiLimit from './middlewares/apiLimiter.js';
+import cookieParser from "cookie-parser"
+import requestLogger, { auditLog } from './middlewares/apiLogger.middleware.js'
+import errorHandler from './middlewares/error.middleware.js';
+// import requestId from './middlewares/requestId.middleware.js'
+
 dotenv.config();
 const app = express();
 dbConnect();
-
+app.set("trust proxy", true);
 app.use(cors({
 
     origin: process.env.Frontend_LINK_DEV,  // frontend ka address
@@ -22,14 +26,17 @@ app.use(cors({
     credentials: true
 }));
 app.use(express.json());
+app.use(cookieParser());
+app.use(requestLogger)
+app.get("/", (req, res, next) => {
+    try {
+        console.log(r);
+        throw new Error("testin errror")
 
-// Data fetched successfully for SBIN
-// Data fetched successfully for RELIANCE
-// error Can only compare identically-labeled Series objects
-// error Can only compare identically-labeled Series objects
-// All Threads is completed for this timeframe15m
-// INFO:app.logger:[15m] Processed strategies.
-
+    } catch (error) {
+        next(error)
+    }
+})
 app.use('/super-admin', superAdminRoutes)
 app.use('/admin', adminRoutes)
 app.use('/medical-director', medicalDirectorRoutes)
@@ -39,11 +46,11 @@ app.use('/common', handleApiLimit, commonRoutes)
 
 // to handel same login sytem with diffrent user 
 app.post('/api/login', login)
-app.get("/", (req, res) => {
-    res.status(200).send("Server is Running")
-})
+
 
 app.use("/uploads", express.static("uploads"));
+
+app.use(errorHandler)
 
 app.listen(process.env.PORT, () => {
     console.log('Server Runs Successfully on', process.env.PORT)
