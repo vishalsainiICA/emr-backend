@@ -6,6 +6,9 @@ const requestLogger = (req, res, next) => {
         req.headers["x-forwarded-for"]?.split(",")[0] ||
         req.socket.remoteAddress;
     res.on("finish", () => {
+        // console.log("req", req);
+        // console.log("data", req.message);
+
         logger.info({
             type: "API",
             requestId: req.requestId,
@@ -15,7 +18,7 @@ const requestLogger = (req, res, next) => {
             ip,
             responseTimeMs: Date.now() - start,
             userId: req.user?.id || null
-        })
+        });
 
 
     })

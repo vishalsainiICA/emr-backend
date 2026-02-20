@@ -3,6 +3,8 @@ import "winston-mongodb";
 import dotenv from "dotenv";
 
 dotenv.config();
+
+// Custom log levels
 const customLevels = {
     levels: {
         error: 0,
@@ -12,47 +14,43 @@ const customLevels = {
         debug: 4
     }
 };
-//Level Filter Function
-const levelFilter = (level) => {
-    return winston.format((info) => {
-        return info.level === level ? info : false;
-    })();
-};
 
+// Custom Format (DO NOT replace info object)
+const customFormat = winston.format((info) => {
+    info.timestamp = new Date().toISOString();
+    info.level = info.level.toUpperCase();
 
+    // I    f message is object, merge it properly
+    if (typeof info.message === "object") {
+        Object.assign(info, info.message);
+        delete info.message;
+    }
+
+    return info;
+});
+
+// Logger
 const logger = winston.createLogger({
     levels: customLevels.levels,
     level: "debug",
-
     format: winston.format.combine(
-        winston.format.timestamp(),
-        winston.format.errors({ stack: true }),
+        customFormat(),
         winston.format.json()
     ),
-
     transports: [
-
         // ERROR LOGS
         new winston.transports.MongoDB({
             db: process.env.MONGO_URI,
             collection: "error_logs",
-            format: levelFilter("error")
+            level: "error"
         }),
 
-        //  API LOGS (only info)
+        // API LOGS
         new winston.transports.MongoDB({
             db: process.env.MONGO_URI,
             collection: "api_logs",
-            format: levelFilter("info")
-        }),
-
-        //AUDIT LOGS (only audit)
-        // new winston.transports.MongoDB({
-        //     db: process.env.MONGO_URI,
-        //     collection: "audit_logs",
-        //     format: levelFilter("warn")
-        // })
-
+            level: "info"
+        })
     ]
 });
 

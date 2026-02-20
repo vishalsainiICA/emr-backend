@@ -30,8 +30,10 @@ app.use(cookieParser());
 app.use(requestLogger)
 app.get("/", (req, res, next) => {
     try {
-        console.log(r);
-        throw new Error("testin errror")
+        // console.log(r);
+        // throw new Error("testin errror")
+
+        res.status(200).json("message:success")
 
     } catch (error) {
         next(error)

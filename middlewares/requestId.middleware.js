@@ -1,4 +1,4 @@
-const { randomUUID } = require("crypto");
+import randomUUID from "crypto"
 
 const requestLogger = (req, res, next) => {
     req.requestId = randomUUID(); // ONE TIME
